@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context="com.elapse.mobileplayer.MainActivity">
-
+    <include layout="@layout/title_bar"/>
     <FrameLayout
         android:id="@+id/fl_main"
         android:layout_width="match_parent"
