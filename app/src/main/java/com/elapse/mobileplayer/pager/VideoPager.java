@@ -71,12 +71,14 @@ public class VideoPager extends BasePager {
                 Intent intent = new Intent(mContext, SystemVideoPlayer.class);
                 intent.setDataAndType(Uri.parse(mediaItem.getData()),"video/*");
                 mContext.startActivity(intent);
+//                Intent intent1 = new Intent(); //隐式意图
+//                intent1.setDataAndType(Uri.parse(mediaItem.getData()),"video/*");
+//                mContext.startActivity(intent1);
             }
         });
         tv_noInfo = view.findViewById(R.id.tv_noInfo);
         ll_loading = view.findViewById(R.id.ll_loading);
         mMediaItems = new ArrayList<>();
-
         return view;
     }
 

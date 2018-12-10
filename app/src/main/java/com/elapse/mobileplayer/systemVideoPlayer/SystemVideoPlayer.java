@@ -23,7 +23,7 @@ public class SystemVideoPlayer extends Activity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_system_video_player);
-        mVideoView = findViewById(R.id.videoview);
+        mVideoView = findViewById(R.id.video_view);
         mUri = getIntent().getData();
         mVideoView.setVideoURI(mUri);
 
@@ -38,7 +38,7 @@ public class SystemVideoPlayer extends Activity {
             @Override
             public boolean onError(MediaPlayer mp, int what, int extra) {
                 Toast.makeText(SystemVideoPlayer.this,"Unknown error",Toast.LENGTH_SHORT).show();
-                return true;
+                return false;
             }
         });
 
@@ -46,6 +46,7 @@ public class SystemVideoPlayer extends Activity {
             @Override
             public void onCompletion(MediaPlayer mp) {
                 Toast.makeText(SystemVideoPlayer.this,"finished",Toast.LENGTH_SHORT).show();
+                finish();
             }
         });
         // set control panel
