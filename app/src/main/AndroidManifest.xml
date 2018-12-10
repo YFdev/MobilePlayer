@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.elapse.mobileplayer">
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
 
     <application
         android:allowBackup="true"
@@ -17,7 +19,8 @@
             </intent-filter>
         </activity>
         <!--android:launchMode="singleTask"-->
-        <activity android:name=".MainActivity"> </activity>
+        <activity android:name=".MainActivity" android:screenOrientation="portrait"> </activity>
+        <activity android:name=".systemVideoPlayer.SystemVideoPlayer" android:screenOrientation="landscape"> </activity>
     </application>
 
 </manifest>

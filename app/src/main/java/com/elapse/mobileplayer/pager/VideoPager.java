@@ -2,13 +2,16 @@ package com.elapse.mobileplayer.pager;
 
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.MediaStore;
+import android.text.format.Formatter;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -16,8 +19,10 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.elapse.mobileplayer.R;
+import com.elapse.mobileplayer.systemVideoPlayer.SystemVideoPlayer;
 import com.elapse.mobileplayer.base.BasePager;
 import com.elapse.mobileplayer.domain.MediaItem;
+import com.elapse.mobileplayer.util.Utils;
 
 import java.util.ArrayList;
 
@@ -32,6 +37,8 @@ public class VideoPager extends BasePager {
     private TextView tv_noInfo;
     private LinearLayout ll_loading;
     private ArrayList<MediaItem> mMediaItems ;
+    private Utils mUtils;
+
     private Handler mHandler = new Handler(new Handler.Callback() {
         @Override
         public boolean handleMessage(Message msg) {
@@ -49,15 +56,27 @@ public class VideoPager extends BasePager {
     });
     public VideoPager(Context context) {
         super(context);
+        mUtils = new Utils();
     }
 
     @Override
     public View initView() {
         View view = View.inflate(mContext, R.layout.video_pager,null);
         lv_video_pager = view.findViewById(R.id.lv_video_pager);
+        //set onClickEvent
+        lv_video_pager.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                MediaItem mediaItem = mMediaItems.get(position);
+                Intent intent = new Intent(mContext, SystemVideoPlayer.class);
+                intent.setDataAndType(Uri.parse(mediaItem.getData()),"video/*");
+                mContext.startActivity(intent);
+            }
+        });
         tv_noInfo = view.findViewById(R.id.tv_noInfo);
         ll_loading = view.findViewById(R.id.ll_loading);
         mMediaItems = new ArrayList<>();
+
         return view;
     }
 
@@ -99,9 +118,10 @@ public class VideoPager extends BasePager {
                 holder = (ViewHolder) convertView.getTag();
             }
 //            holder.img.setImageResource();
-            holder.tv_duration.setText(String.valueOf(mMediaItems.get(position).getDuration()));
-            holder.tv_name.setText(mMediaItems.get(position).getName());
-            holder.tv_size.setText(String.valueOf(mMediaItems.get(position).getSize()));
+            MediaItem mediaItem = mMediaItems.get(position);
+            holder.tv_duration.setText(mUtils.timeToString((int) mediaItem.getDuration()));
+            holder.tv_name.setText(mediaItem.getName());
+            holder.tv_size.setText(Formatter.formatFileSize(mContext,mediaItem.getSize()));
             return convertView;
         }
     }
