@@ -5,9 +5,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.MediaStore;
+import android.support.v4.media.MediaMetadataCompat;
 import android.text.format.Formatter;
 import android.view.View;
 import android.view.ViewGroup;
@@ -68,12 +70,21 @@ public class VideoPager extends BasePager {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 MediaItem mediaItem = mMediaItems.get(position);
-                Intent intent = new Intent(mContext, SystemVideoPlayer.class);
-                intent.setDataAndType(Uri.parse(mediaItem.getData()),"video/*");
-                mContext.startActivity(intent);
+                //跳转到播放页
+//                Intent intent = new Intent(mContext, SystemVideoPlayer.class);
+//                intent.setDataAndType(Uri.parse(mediaItem.getData()),"video/*");
+//                mContext.startActivity(intent);
 //                Intent intent1 = new Intent(); //隐式意图
 //                intent1.setDataAndType(Uri.parse(mediaItem.getData()),"video/*");
 //                mContext.startActivity(intent1);
+                //传递视频列表
+                Intent intent = new Intent(mContext,SystemVideoPlayer.class);
+//                intent.setDataAndType(Uri.parse(mediaItem.getData()),"video/*");
+                Bundle b = new Bundle();
+                b.putSerializable("video_list",mMediaItems);
+                intent.putExtras(b);
+                intent.putExtra("position",position);
+                mContext.startActivity(intent);
             }
         });
         tv_noInfo = view.findViewById(R.id.tv_noInfo);

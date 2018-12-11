@@ -12,6 +12,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.Nullable;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -21,9 +22,12 @@ import android.widget.Toast;
 import android.widget.VideoView;
 
 import com.elapse.mobileplayer.R;
+import com.elapse.mobileplayer.domain.MediaItem;
 import com.elapse.mobileplayer.util.Utils;
 
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
 
@@ -52,7 +56,7 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener 
     private TextView tv_current_duration;//已播放时长
     private SeekBar seek_bar_video;//当前进度
     private TextView tv_duration;//总时长
-    //控制按钮栏
+    //控制按钮栏_布局
     private LinearLayout ll_controller;
     //退出、前一个、暂停、后一个、全屏
     private Button btn_video_exit,btn_previous,btn_pause,btn_forward,btn_full_screen;
@@ -78,7 +82,10 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener 
             return true;
         }
     });
+
     private BroadcastReceiver mBatteryChangeReceiver;
+    private ArrayList<MediaItem> video_list;
+    private int position;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -87,9 +94,28 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener 
 
         initView();
         initData();
-        mUri = getIntent().getData();
-        mVideoView.setVideoURI(mUri);
+        getData();
+        setData();
         setListener();
+    }
+
+    private void setData() {
+        if (video_list != null && video_list.size() >0){
+            MediaItem mediaItem = video_list.get(position);
+            mVideoView.setVideoPath(mediaItem.getData());
+            video_name.setText(mediaItem.getName());
+        }else if (mUri != null){
+            mVideoView.setVideoURI(mUri);
+            video_name.setText(mUri.toString());
+        }
+
+    }
+
+    private void getData() {
+        video_list = (ArrayList<MediaItem>) getIntent().getSerializableExtra("video_list");
+        position = getIntent().getIntExtra("position",0);
+        mUri = getIntent().getData();//获取一个地址:文件、浏览器、相册等
+
     }
 
     private void initData() {
@@ -99,7 +125,6 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener 
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(Intent.ACTION_BATTERY_CHANGED);
         registerReceiver(mBatteryChangeReceiver,intentFilter);
-
     }
 
     private void setListener() {
@@ -191,11 +216,11 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener 
         switch (v.getId()){
             case R.id.btn_pause:
                 if (mVideoView.isPlaying()){
-                    mVideoView.pause();
                     btn_pause.setPressed(true);
+                    mVideoView.pause();
                 } else{
-                    mVideoView.start();
                     btn_pause.setPressed(false);
+                    mVideoView.start();
                 }
                 break;
             case R.id.btn_video_exit:
