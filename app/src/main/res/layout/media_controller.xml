@@ -4,7 +4,7 @@
     android:layout_height="match_parent"
     android:background="@drawable/bg_player_1">
 
-    <VideoView
+    <com.elapse.mobileplayer.view.CustomVideoView
         android:id="@+id/video_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -78,7 +78,7 @@
                 android:layout_weight="1"
                 android:maxHeight="6dp"
                 android:minHeight="6dp"
-                android:progress="20"
+                android:progress="60"
                 android:progressDrawable="@drawable/seekbar_progress_horizontal"
                 android:thumb="@drawable/progress_dot_normal" />
 
@@ -123,7 +123,7 @@
                 android:layout_weight="1"
                 android:maxHeight="6dp"
                 android:minHeight="6dp"
-                android:progress="20"
+                android:progress="0"
                 android:progressDrawable="@drawable/seekbar_progress_horizontal"
                 android:thumb="@drawable/progress_dot_normal" />
 

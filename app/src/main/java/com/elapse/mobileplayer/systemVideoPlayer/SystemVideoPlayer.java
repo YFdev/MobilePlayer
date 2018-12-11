@@ -11,21 +11,22 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.Nullable;
+import android.util.DisplayMetrics;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.VideoView;
+import com.elapse.mobileplayer.view.CustomVideoView;
 
 import com.elapse.mobileplayer.R;
 import com.elapse.mobileplayer.domain.MediaItem;
 import com.elapse.mobileplayer.util.Utils;
 
-import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -38,12 +39,18 @@ import java.util.Locale;
 public class SystemVideoPlayer extends Activity implements View.OnClickListener {
 
     private static final int PROGRESS = 0 ;
+    private static final int HIDE_MEDIA_CONTROLLER = 1;
+    /**
+     * 全屏
+     */
+    private static final int FULL_SCREEN = 1;
+    private static final int DEFAULT_SCREEN = 2;
     private Utils mUtils;
-    private VideoView mVideoView;
+    private CustomVideoView mVideoView;
     private Uri mUri;
     //顶部标题栏
     private LinearLayout ll_top_bar;
-    private LinearLayout ll_name_time;//影片名称和当前时间
+    private LinearLayout ll_name_time;//影片名称和当前时间-->布局
     private TextView current_time;//当前时间
     private TextView video_name;//影片名称
     private SeekBar current_volume;//音量
@@ -52,14 +59,23 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener 
     private ImageView img_battery_state;//电量信息
     //底部控制栏
     private LinearLayout ll_bottom_bar;
-    private LinearLayout ll_duration;//
+    private LinearLayout ll_duration;//-->布局
     private TextView tv_current_duration;//已播放时长
     private SeekBar seek_bar_video;//当前进度
     private TextView tv_duration;//总时长
     //控制按钮栏_布局
-    private LinearLayout ll_controller;
+    private LinearLayout ll_controller;//-->布局
     //退出、前一个、暂停、后一个、全屏
     private Button btn_video_exit,btn_previous,btn_pause,btn_forward,btn_full_screen;
+
+    private BroadcastReceiver mBatteryChangeReceiver;
+    private ArrayList<MediaItem> mMediaItems;
+    private int position;
+    //手势识别
+    private GestureDetector mDetector;
+    //是否显示控制面板
+    private boolean isControllerShow;
+
     //发消息更新seekbar进度
     private Handler mHandler = new Handler(new Handler.Callback() {
         @Override
@@ -78,14 +94,21 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener 
                     // mHandler.removeMessages(PROGRESS);
                     mHandler.sendEmptyMessageDelayed(PROGRESS,1000);
                     break;
+                case HIDE_MEDIA_CONTROLLER:
+                    hideMediaController();
+                    break;
             }
             return true;
         }
     });
-
-    private BroadcastReceiver mBatteryChangeReceiver;
-    private ArrayList<MediaItem> video_list;
-    private int position;
+    //设置是否全屏
+    private boolean isFullScreen;
+    //获取屏幕参数
+    private int screenWidth = 0;
+    private int screenHeight = 0;
+    //视频真实宽高
+    private int videoHeight;
+    private int videoWidth;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -100,22 +123,23 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener 
     }
 
     private void setData() {
-        if (video_list != null && video_list.size() >0){
-            MediaItem mediaItem = video_list.get(position);
+        if (mMediaItems != null && mMediaItems.size() >0){
+            MediaItem mediaItem = mMediaItems.get(position);
             mVideoView.setVideoPath(mediaItem.getData());
             video_name.setText(mediaItem.getName());
         }else if (mUri != null){
             mVideoView.setVideoURI(mUri);
             video_name.setText(mUri.toString());
+        }else {
+            Toast.makeText(this,"没有视频",Toast.LENGTH_SHORT).show();
         }
-
+        setButtonState();
     }
 
     private void getData() {
-        video_list = (ArrayList<MediaItem>) getIntent().getSerializableExtra("video_list");
+        mMediaItems = (ArrayList<MediaItem>) getIntent().getSerializableExtra("video_list");
         position = getIntent().getIntExtra("position",0);
         mUri = getIntent().getData();//获取一个地址:文件、浏览器、相册等
-
     }
 
     private void initData() {
@@ -125,19 +149,119 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener 
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(Intent.ACTION_BATTERY_CHANGED);
         registerReceiver(mBatteryChangeReceiver,intentFilter);
+        //获取屏幕参数
+//        screenWidth = getWindowManager().getDefaultDisplay().getWidth();//过时方法
+//        screenHeight = getWindowManager().getDefaultDisplay().getHeight();
+        DisplayMetrics metrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(metrics);
+        screenWidth = metrics.widthPixels;
+        screenHeight = metrics.heightPixels;
+        //实例化手势识别器，处理双击、长按、单击事件
+        mDetector = new GestureDetector(this,new GestureDetector.SimpleOnGestureListener(){
+            @Override
+            public void onLongPress(MotionEvent e) {
+                super.onLongPress(e);
+                startAndPauseVideo();
+            }
+
+            @Override
+            public boolean onDoubleTap(MotionEvent e) {
+                setFullScreenAndDefaultMode();
+                return super.onDoubleTap(e);
+            }
+
+
+
+            @Override
+            public boolean onSingleTapConfirmed(MotionEvent e) {
+                if (isControllerShow){
+                    hideMediaController();
+                    mHandler.removeMessages(HIDE_MEDIA_CONTROLLER);
+                }else {
+                    showMediaController();
+                    mHandler.sendEmptyMessageDelayed(HIDE_MEDIA_CONTROLLER,3500);
+                }
+                return super.onSingleTapConfirmed(e);
+            }
+        });
+    }
+
+    private void setFullScreenAndDefaultMode() {
+        if (!isFullScreen){
+            //设置默认
+            setVideoType(FULL_SCREEN);
+        }else {
+            //设置全屏
+            setVideoType(DEFAULT_SCREEN);
+        }
+    }
+
+    private void setVideoType(int type) {
+        switch (type){
+            case FULL_SCREEN:
+                //1、设置视频画面大小-->设置与屏幕相同大小
+                mVideoView.setVideoSize(screenWidth,screenHeight);
+                //2、设置全屏按钮状态
+                btn_full_screen.setBackgroundResource(R.drawable.btn_full_screen_pressed);
+                isFullScreen = true;
+                break;
+            case DEFAULT_SCREEN:
+                isFullScreen = false;
+                //设置视频画面大小
+                //视频真实宽高
+                int mVideoWidth = videoWidth;
+                int mVideoHeight = videoHeight;
+                //屏幕宽高
+                int width = screenWidth;
+                int height = screenHeight;
+                if (mVideoWidth * height < width * mVideoHeight){
+                    width = height * mVideoWidth / mVideoHeight;
+                }else if (mVideoWidth * height > width * mVideoHeight){
+                    height = width * mVideoHeight / mVideoWidth;
+                }
+                mVideoView.setVideoSize(width,height);
+                //设置全屏按钮状态
+                btn_full_screen.setBackgroundResource(R.drawable.btn_full_screen_normal);
+                break;
+        }
+    }
+    /**
+     * 隐藏控制面板
+     */
+    private void hideMediaController() {
+        isControllerShow = false;
+        ll_top_bar.setVisibility(View.GONE);
+        ll_bottom_bar.setVisibility(View.GONE);
+    }
+
+    /**
+     * 显示控制面板
+     */
+    private void showMediaController() {
+        isControllerShow = true;
+        ll_top_bar.setVisibility(View.VISIBLE);
+        ll_bottom_bar.setVisibility(View.VISIBLE);
     }
 
     private void setListener() {
         mVideoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
             @Override
             public void onPrepared(MediaPlayer mp) {
-                //total duration and seekBar.setMax()
+                videoWidth = mp.getVideoWidth();
+                videoHeight = mp.getVideoHeight();
+                mVideoView.start();
+                //获得视频总长，关联seekBar
                 int duration = mVideoView.getDuration();
                 seek_bar_video.setMax(duration);
                 tv_duration.setText(mUtils.timeToString(duration));
-                //send message to update
+                //默认隐藏控制面板
+                hideMediaController();
+                //发消息更新
                 mHandler.sendEmptyMessage(PROGRESS);
-                mVideoView.start();
+//                mVideoView.setVideoSize(mp.getVideoWidth(),mp.getVideoHeight());
+                //设置视频默认播放大小
+                setVideoType(DEFAULT_SCREEN);
+
             }
         });
 
@@ -152,8 +276,9 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener 
         mVideoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mp) {
-                Toast.makeText(SystemVideoPlayer.this,"finished",Toast.LENGTH_SHORT).show();
-                finish();
+//                Toast.makeText(SystemVideoPlayer.this,"finished",Toast.LENGTH_SHORT).show();
+//                finish();
+                playNextVideo();
             }
         });
 //         set control panel
@@ -179,12 +304,12 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener 
         //当触碰seekBar时回调
         @Override
         public void onStartTrackingTouch(SeekBar seekBar) {
-
+            mHandler.removeMessages(HIDE_MEDIA_CONTROLLER);
         }
         //当手指离开seekBar时回调
         @Override
         public void onStopTrackingTouch(SeekBar seekBar) {
-
+            mHandler.sendEmptyMessageDelayed(HIDE_MEDIA_CONTROLLER,3500);
         }
     }
 
@@ -215,25 +340,123 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener 
     public void onClick(View v) {
         switch (v.getId()){
             case R.id.btn_pause:
-                if (mVideoView.isPlaying()){
-                    btn_pause.setPressed(true);
-                    mVideoView.pause();
-                } else{
-                    btn_pause.setPressed(false);
-                    mVideoView.start();
-                }
+                startAndPauseVideo();
                 break;
             case R.id.btn_video_exit:
                 btn_video_exit.setPressed(true);
                 finish();
                 break;
             case R.id.btn_previous:
+                playPreviousVideo();
                 break;
             case R.id.btn_forward:
+                playNextVideo();
                 break;
             case R.id.btn_full_screen:
+                setFullScreenAndDefaultMode();
                 break;
         }
+        mHandler.removeMessages(HIDE_MEDIA_CONTROLLER);
+        mHandler.sendEmptyMessageDelayed(HIDE_MEDIA_CONTROLLER,3500);
+    }
+
+    /**
+     * 视频启停
+     */
+    private void startAndPauseVideo() {
+        if (mVideoView.isPlaying()){
+            btn_pause.setPressed(true);
+            mVideoView.pause();
+        } else{
+            btn_pause.setPressed(false);
+            mVideoView.start();
+        }
+    }
+
+    /**
+     * 播放前一个视频
+     */
+    private void playPreviousVideo() {
+        if (mMediaItems != null && mMediaItems.size() > 0){
+            position --;
+            if (position >= 0){
+                MediaItem mediaItem = mMediaItems.get(position);
+                video_name.setText(mediaItem.getName());
+                mVideoView.setVideoPath(mediaItem.getData());
+                setButtonState();
+            }
+        }else if (mUri != null){
+            setButtonState();
+        }
+    }
+
+    /**
+     * 播放下一个视频
+     */
+    private void playNextVideo() {
+        if(mMediaItems != null && mMediaItems.size() >0){
+            //播放下一个
+            position++;
+            if (position < mMediaItems.size()){
+                MediaItem mediaItem = mMediaItems.get(position);
+                video_name.setText(mediaItem.getName());
+                mVideoView.setVideoPath(mediaItem.getData());
+
+                //设置按钮状态
+                setButtonState();
+            }
+        }else if (mUri != null){
+            //设置上一个/下一个按钮为灰色切不可点击
+            setButtonState();
+        }
+    }
+
+    private void setButtonState() {
+        if (mMediaItems != null && mMediaItems.size() > 0){
+            if (mMediaItems.size() == 1){
+               setEnabledFalse();
+            }else if (mMediaItems.size() == 2){
+                if (position == 0){
+                    btn_previous.setBackgroundResource(R.drawable.video_pre_gray);
+                    btn_previous.setEnabled(false);
+                    btn_forward.setBackgroundResource(R.drawable.btn_forward_selector);
+                    btn_forward.setEnabled(true);
+                }else {
+                    btn_previous.setBackgroundResource(R.drawable.btn_back_selector);
+                    btn_previous.setEnabled(true);
+                    btn_forward.setBackgroundResource(R.drawable.video_next_btn_bg);
+                    btn_forward.setEnabled(false);
+                }
+            }
+            else {
+                if (position == 0){
+                    btn_previous.setBackgroundResource(R.drawable.video_pre_gray);
+                    btn_previous.setEnabled(false);
+                }else if (position == mMediaItems.size()-1){
+                    btn_forward.setBackgroundResource(R.drawable.video_next_btn_bg);
+                    btn_forward.setEnabled(false);
+                }else {
+                    btn_forward.setBackgroundResource(R.drawable.btn_forward_selector);
+                    btn_forward.setEnabled(true);
+
+                    btn_previous.setBackgroundResource(R.drawable.btn_back_selector);
+                    btn_previous.setEnabled(true);
+                }
+            }
+        }else if (mUri != null){
+            //两个按钮均设置灰色
+            setEnabledFalse();
+        }
+    }
+
+    /**
+     * 设置前进后退键
+     */
+    private void setEnabledFalse() {
+        btn_forward.setBackgroundResource(R.drawable.video_next_btn_bg);
+        btn_forward.setEnabled(false);
+        btn_previous.setBackgroundResource(R.drawable.video_pre_gray);
+        btn_previous.setEnabled(false);
     }
 
     @Override
@@ -273,4 +496,10 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener 
         }
     }
 
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        //接管onTouchEvent
+        mDetector.onTouchEvent(event);
+        return super.onTouchEvent(event);
+    }
 }
