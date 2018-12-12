@@ -28,4 +28,20 @@ public class Utils {
         }else
             return mFormatter.format("%02d:%02d",minutes,seconds).toString();
     }
+
+    /**
+     * 判断是否为网络资源
+     * @param uri
+     * @return
+     */
+    public boolean isNetUri(String uri){
+        boolean result = false;
+        if (uri != null){
+            if (uri.toLowerCase().startsWith("http") || uri.toLowerCase().startsWith("rtsp")
+                    || uri.toLowerCase().startsWith("mms")){
+                result = true;
+            }
+        }
+        return result;
+    }
 }

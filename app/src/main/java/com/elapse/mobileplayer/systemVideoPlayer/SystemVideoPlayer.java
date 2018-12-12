@@ -8,10 +8,12 @@ import android.content.IntentFilter;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.Nullable;
+import android.support.annotation.RequiresApi;
 import android.util.DisplayMetrics;
 import android.view.GestureDetector;
 import android.view.KeyEvent;
@@ -49,6 +51,7 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener 
     private static final int DEFAULT_SCREEN = 2;
     private Utils mUtils;
     private CustomVideoView mVideoView;
+    //接收intent传递的URI
     private Uri mUri;
     //顶部标题栏
     private LinearLayout ll_top_bar;
@@ -59,7 +62,7 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener 
     private Button btn_voice;//音量控制按钮
     private Button btn_info;//info信息
     private ImageView img_battery_state;//电量信息
-    //底部控制栏
+    //底部控制栏-->布局
     private LinearLayout ll_bottom_bar;
     private LinearLayout ll_duration;//-->布局
     private TextView tv_current_duration;//已播放时长
@@ -69,40 +72,25 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener 
     private LinearLayout ll_controller;//-->布局
     //退出、前一个、暂停、后一个、全屏
     private Button btn_video_exit,btn_previous,btn_pause,btn_forward,btn_full_screen;
-
+    //播放卡布局
+    private LinearLayout buffer_layout;
+    //网速信息
+    private TextView net_work_info;
+    //是否使用系统监听卡(直播使用)
+    private boolean usingSysListener = false;
+    //接收电量广播
     private BroadcastReceiver mBatteryChangeReceiver;
+    //接收intent传递的播放列表
     private ArrayList<MediaItem> mMediaItems;
+    //接收intent传递的列表位置
     private int position;
     //手势识别
     private GestureDetector mDetector;
     //是否显示控制面板
     private boolean isControllerShow;
-
+    //保存上一次播放进度
+    private int pre_position;
     //发消息更新seekbar进度
-    private Handler mHandler = new Handler(new Handler.Callback() {
-        @Override
-        public boolean handleMessage(Message msg) {
-            switch (msg.what){
-                case PROGRESS:
-                    //得到当前播放进度
-                    int currentPosition = mVideoView.getCurrentPosition();
-                    seek_bar_video.setProgress(currentPosition);
-                    tv_current_duration.setText(mUtils.timeToString(currentPosition));
-
-                    //更新系统时间
-                    current_time.setText(getSystemTime());
-
-                    //每秒更新一次
-                    // mHandler.removeMessages(PROGRESS);
-                    mHandler.sendEmptyMessageDelayed(PROGRESS,1000);
-                    break;
-                case HIDE_MEDIA_CONTROLLER:
-                    hideMediaController();
-                    break;
-            }
-            return true;
-        }
-    });
     //设置是否全屏
     private boolean isFullScreen;
     //获取屏幕参数
@@ -120,9 +108,62 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener 
      * 最大音量
      * 0--15
      */
-
     private int maxVolume;
+    //是否静音
     private boolean isMute = false;
+    //判断是否为网络资源
+    private boolean isNetUri;
+
+    private Handler mHandler = new Handler(new Handler.Callback() {
+        @Override
+        public boolean handleMessage(Message msg) {
+            switch (msg.what){
+                case PROGRESS:
+                    //得到当前播放进度
+                    int currentPosition = mVideoView.getCurrentPosition();
+                    seek_bar_video.setProgress(currentPosition);
+                    tv_current_duration.setText(mUtils.timeToString(currentPosition));
+
+                    //更新系统时间
+                    current_time.setText(getSystemTime());
+
+                    //缓冲进度
+                    if (isNetUri){
+                        //只有网络资源才需要缓冲
+                        int buffer = mVideoView.getBufferPercentage();//0--100
+                        int total_buffer = buffer * seek_bar_video.getMax();
+                        int secondProgress = total_buffer / 100;
+                        seek_bar_video.setSecondaryProgress(secondProgress);
+                    }else {
+                        //本地视频不缓冲
+                        seek_bar_video.setSecondaryProgress(0);
+                    }
+
+                    //监听卡
+                    if (!usingSysListener && mVideoView.isPlaying()){
+                        int buffer = currentPosition - pre_position;
+                        if (buffer < 500){
+                            //视频卡
+                            buffer_layout.setVisibility(View.VISIBLE);
+                        }else{
+                            //视频不卡
+                            buffer_layout.setVisibility(View.GONE);
+                        }
+                    }else {
+                        buffer_layout.setVisibility(View.GONE);
+                    }
+                    pre_position = currentPosition;
+                    //每秒更新一次
+                    // mHandler.removeMessages(PROGRESS);
+                    mHandler.sendEmptyMessageDelayed(PROGRESS,1000);
+                    break;
+                case HIDE_MEDIA_CONTROLLER:
+                    hideMediaController();
+                    break;
+            }
+            return true;
+        }
+    });
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -139,10 +180,12 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener 
     private void setData() {
         if (mMediaItems != null && mMediaItems.size() >0){
             MediaItem mediaItem = mMediaItems.get(position);
+            isNetUri = mUtils.isNetUri(mediaItem.getData());
             mVideoView.setVideoPath(mediaItem.getData());
             video_name.setText(mediaItem.getName());
         }else if (mUri != null){
             mVideoView.setVideoURI(mUri);
+            isNetUri = mUtils.isNetUri(mUri.toString());
             video_name.setText(mUri.toString());
         }else {
             Toast.makeText(this,"没有视频",Toast.LENGTH_SHORT).show();
@@ -308,6 +351,16 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener 
         seek_bar_video.setOnSeekBarChangeListener(new MyVideoSeekBarChangeListener());
 
         seek_current_volume.setOnSeekBarChangeListener(new VolumeSeekBarChangeListener());
+
+        if (usingSysListener){
+            //监听视频卡顿--系统api
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                mVideoView.setOnInfoListener(new MyOnInfoListener());
+            }
+        }else {
+
+        }
+
     }
 
     public String getSystemTime() {
@@ -315,6 +368,24 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener 
         return format.format(new Date());
     }
 
+    private class MyOnInfoListener implements MediaPlayer.OnInfoListener{
+
+        @Override
+        public boolean onInfo(MediaPlayer mp, int what, int extra) {
+            switch (what){
+                case MediaPlayer.MEDIA_INFO_BUFFERING_START://视频卡、拖动卡
+//                    Toast.makeText(SystemVideoPlayer.this,"卡顿",Toast.LENGTH_SHORT).show();
+                    buffer_layout.setVisibility(View.VISIBLE);
+//                    net_work_info.setText();
+                    break;
+                case MediaPlayer.MEDIA_INFO_BUFFERING_END://视频拖动卡结束
+                    buffer_layout.setVisibility(View.GONE);
+                    break;
+            }
+
+            return true;
+        }
+    }
     //音量控制条
     private class VolumeSeekBarChangeListener implements SeekBar.OnSeekBarChangeListener {
 
@@ -401,6 +472,8 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener 
         seek_current_volume = findViewById(R.id.current_volume);
         video_name = findViewById(R.id.video_name);
         img_battery_state = findViewById(R.id.img_battery_state);
+        buffer_layout = findViewById(R.id.buffer_layout);
+        net_work_info = findViewById(R.id.net_work_info);
 
         btn_pause.setOnClickListener(this);
         btn_video_exit.setOnClickListener(this);
@@ -460,6 +533,7 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener 
             position --;
             if (position >= 0){
                 MediaItem mediaItem = mMediaItems.get(position);
+                isNetUri = mUtils.isNetUri(mediaItem.getData());
                 video_name.setText(mediaItem.getName());
                 mVideoView.setVideoPath(mediaItem.getData());
                 setButtonState();
@@ -479,6 +553,7 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener 
             if (position < mMediaItems.size()){
                 MediaItem mediaItem = mMediaItems.get(position);
                 video_name.setText(mediaItem.getName());
+                isNetUri = mUtils.isNetUri(mediaItem.getData());
                 mVideoView.setVideoPath(mediaItem.getData());
 
                 //设置按钮状态

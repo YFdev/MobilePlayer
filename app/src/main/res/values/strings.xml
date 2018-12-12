@@ -1,5 +1,6 @@
 <resources>
-    <string name="app_name">玉溪影音</string>
+    <string name="app_name">橙子影音</string>
+    <string name="player_name">橙子影音（牛X）</string>
     <string name="Splash_loading">Loading...</string>
 
     <!-- TODO: Remove or change this placeholder text -->
