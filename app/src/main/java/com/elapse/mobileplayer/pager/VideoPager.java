@@ -9,7 +9,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.MediaStore;
-import android.support.v4.media.MediaMetadataCompat;
 import android.text.format.Formatter;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,7 +20,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.elapse.mobileplayer.R;
-import com.elapse.mobileplayer.systemVideoPlayer.SystemVideoPlayer;
+import com.elapse.mobileplayer.activity.SystemVideoPlayer;
 import com.elapse.mobileplayer.base.BasePager;
 import com.elapse.mobileplayer.domain.MediaItem;
 import com.elapse.mobileplayer.util.Utils;

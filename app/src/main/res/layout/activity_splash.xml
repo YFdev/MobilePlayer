@@ -7,7 +7,7 @@
     android:background="@android:color/white"
     android:orientation="vertical"
     android:gravity="center"
-    tools:context="com.elapse.mobileplayer.SplashActivity">
+    tools:context="com.elapse.mobileplayer.activity.SplashActivity">
 
     <ImageView
         android:id="@+id/iv_login_icon"

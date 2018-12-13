@@ -1,6 +1,9 @@
 package com.elapse.mobileplayer.util;
 
 
+import android.content.Context;
+import android.net.TrafficStats;
+
 import java.util.Formatter;
 
 /**
@@ -11,7 +14,8 @@ public class Utils {
 
     private StringBuilder mFormatBuilder;
     private Formatter mFormatter;
-
+    private long lastTotalBytes;
+    private long lastTimeStamp;
     public Utils() {
         mFormatBuilder = new StringBuilder();
         mFormatter = new Formatter();
@@ -43,5 +47,20 @@ public class Utils {
             }
         }
         return result;
+    }
+
+    /**
+     * 获取网速
+     * @param context
+     * @return
+     */
+    public String getNetWorkSpeed(Context context){
+        long nowTotalBytes = TrafficStats.getUidRxBytes(context.getApplicationInfo().uid) ==
+                TrafficStats.UNSUPPORTED ? 0 : TrafficStats.getTotalRxBytes()/1024;
+        long nowTimeStamp = System.currentTimeMillis();
+        long speed = ((nowTotalBytes - lastTotalBytes)*1000 / (nowTimeStamp - lastTimeStamp));
+        lastTotalBytes = nowTotalBytes;
+        lastTimeStamp = nowTimeStamp;
+        return speed + "kb/s";
     }
 }
