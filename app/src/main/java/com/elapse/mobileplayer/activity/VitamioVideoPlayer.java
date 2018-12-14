@@ -3,6 +3,7 @@ package com.elapse.mobileplayer.activity;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.AudioManager;
@@ -12,6 +13,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.Nullable;
+import android.support.v7.app.AlertDialog;
 import android.util.DisplayMetrics;
 import android.view.GestureDetector;
 import android.view.KeyEvent;
@@ -353,14 +355,9 @@ public class VitamioVideoPlayer extends Activity implements View.OnClickListener
         mVideoView.setOnErrorListener(new MediaPlayer.OnErrorListener() {
             @Override
             public boolean onError(MediaPlayer mp, int what, int extra) {
-                Toast.makeText(VitamioVideoPlayer.this,"Unknown error",Toast.LENGTH_SHORT).show();
-               //1、格式不支持-->跳转到万能播放器
-
-                //2、播放网络视频时，网络中断-->1、网络断了：提示用户网络中断；2、网络断断续续：重试
-
-                //3、播放的时候视频中间有空白-->下载
-
-                return false;
+//                Toast.makeText(VitamioVideoPlayer.this,"Unknown error",Toast.LENGTH_SHORT).show();
+               showErrorDialog();
+                return true;
             }
         });
 
@@ -387,6 +384,58 @@ public class VitamioVideoPlayer extends Activity implements View.OnClickListener
                 usingSysListener = false;
             }
         }
+    }
+
+    /**
+     * 切换到系统播放器
+     */
+    private void showSwitchPlayer(){
+        AlertDialog.Builder builder  = new AlertDialog.Builder(this);
+        builder.setTitle("提示");
+        builder.setMessage("当视频花屏时，可尝试切换到系统播放器");
+        builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                startSystemPlayer();
+            }
+        });
+        builder.setNegativeButton("取消",null);
+        builder.show();
+    }
+
+    /**
+     * 切换到系统播放器
+     */
+    private void startSystemPlayer(){
+        if (mVideoView != null){
+            mVideoView.stopPlayback();
+        }
+        Intent intent = new Intent(this,SystemVideoPlayer.class);
+        if (mMediaItems != null && mMediaItems.size() > 0){
+            Bundle b = new Bundle();
+            b.putSerializable("video_list",mMediaItems);
+            intent.putExtras(b);
+            intent.putExtra("position",position);
+        }else if (mUri != null){
+            intent.setData(mUri);
+        }
+        startActivity(intent);
+        finish();
+    }
+    /**
+     * 播放出错处理
+     */
+    private void showErrorDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("提示");
+        builder.setMessage("抱歉，无法播放该视频");
+        builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                finish();
+            }
+        });
+        builder.show();
     }
 
     public String getSystemTime() {
@@ -510,6 +559,7 @@ public class VitamioVideoPlayer extends Activity implements View.OnClickListener
         btn_forward.setOnClickListener(this);
         btn_previous.setOnClickListener(this);
         btn_voice.setOnClickListener(this);
+        btn_info.setOnClickListener(this);
     }
 
     @Override
@@ -535,6 +585,9 @@ public class VitamioVideoPlayer extends Activity implements View.OnClickListener
                 //通过AudioManager调节音量，1、实例化AudioManager;2、获取当前音量、最大音量；3、与seekBar关联；4、设置SeekBar状态变化
                 isMute = ! isMute;
                 updateVolume(currentVolume,isMute);
+                break;
+            case R.id.btn_info:
+                showSwitchPlayer();
                 break;
         }
         mHandler.removeMessages(HIDE_MEDIA_CONTROLLER);

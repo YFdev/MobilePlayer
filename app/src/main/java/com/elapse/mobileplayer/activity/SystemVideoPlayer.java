@@ -3,6 +3,7 @@ package com.elapse.mobileplayer.activity;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.AudioManager;
@@ -13,6 +14,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.Nullable;
+import android.support.v7.app.AlertDialog;
 import android.util.DisplayMetrics;
 import android.view.GestureDetector;
 import android.view.KeyEvent;
@@ -531,6 +533,7 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener 
         btn_forward.setOnClickListener(this);
         btn_previous.setOnClickListener(this);
         btn_voice.setOnClickListener(this);
+        btn_info.setOnClickListener(this);
     }
 
     @Override
@@ -557,11 +560,27 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener 
                 isMute = ! isMute;
                 updateVolume(currentVolume,isMute);
                 break;
+            case R.id.btn_info:
+                showSwitchPlayer();
+                break;
         }
         mHandler.removeMessages(HIDE_MEDIA_CONTROLLER);
         mHandler.sendEmptyMessageDelayed(HIDE_MEDIA_CONTROLLER,3500);
     }
 
+    private void showSwitchPlayer(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("提示");
+        builder.setMessage("当播放器无画面时，请切换到万能播放器");
+        builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                startVitamioPlayer();
+            }
+        });
+        builder.setNegativeButton("取消", null);
+        builder.show();
+    }
     /**
      * 视频启停
      */
