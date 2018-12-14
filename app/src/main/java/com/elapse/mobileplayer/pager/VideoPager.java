@@ -68,7 +68,7 @@ public class VideoPager extends BasePager {
         lv_video_pager.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                MediaItem mediaItem = mMediaItems.get(position);
+//                MediaItem mediaItem = mMediaItems.get(position);
                 //跳转到播放页
 //                Intent intent = new Intent(mContext, SystemVideoPlayer.class);
 //                intent.setDataAndType(Uri.parse(mediaItem.getData()),"video/*");
@@ -139,7 +139,7 @@ public class VideoPager extends BasePager {
     }
 
     static class ViewHolder{
-        ImageView img;
+//        ImageView img;
         TextView tv_name;
         TextView tv_size;
         TextView tv_duration;

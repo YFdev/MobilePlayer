@@ -13,6 +13,52 @@ public class MediaItem implements Parcelable/*Serializable*/{
     private String name;
     private long size;
     private long duration;
+    private String data;
+    private  String artist;
+    private String imgUrl;
+//    private String videoUrl;
+//    private String highQUrl;
+    private String desc;
+
+    public String getArtist() {
+        return artist;
+    }
+
+    public void setArtist(String artist) {
+        this.artist = artist;
+    }
+
+    public String getImgUrl() {
+        return imgUrl;
+    }
+
+    public void setImgUrl(String imgUrl) {
+        this.imgUrl = imgUrl;
+    }
+
+//    public String getVideoUrl() {
+//        return videoUrl;
+//    }
+//
+//    public void setVideoUrl(String videoUrl) {
+//        this.videoUrl = videoUrl;
+//    }
+//
+//    public String getHighQUrl() {
+//        return highQUrl;
+//    }
+//
+//    public void setHighQUrl(String highQUrl) {
+//        this.highQUrl = highQUrl;
+//    }
+
+    public String getDesc() {
+        return desc;
+    }
+
+    public void setDesc(String desc) {
+        this.desc = desc;
+    }
 
     public MediaItem() {
     }
@@ -21,7 +67,12 @@ public class MediaItem implements Parcelable/*Serializable*/{
          name = source.readString();
          size = source.readLong();
          duration = source.readLong();
-
+         data = source.readString();
+         artist = source.readString();
+         imgUrl = source.readString();
+//         videoUrl = source.readString();
+//         highQUrl = source.readString();
+         desc = source.readString();
     }
 
     public String getName() {
@@ -56,7 +107,6 @@ public class MediaItem implements Parcelable/*Serializable*/{
         this.data = data;
     }
 
-    private String data;
 
 
     @Override
@@ -69,6 +119,12 @@ public class MediaItem implements Parcelable/*Serializable*/{
         dest.writeString(name);
         dest.writeLong(size);
         dest.writeLong(duration);
+        dest.writeString(data);
+        dest.writeString(artist);
+        dest.writeString(imgUrl);
+//        dest.writeString(videoUrl);
+//        dest.writeString(highQUrl);
+        dest.writeString(desc);
     }
 
     public static final Creator CREATOR = new Creator() {
