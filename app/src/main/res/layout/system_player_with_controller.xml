@@ -31,6 +31,7 @@
             <TextView
                 android:id="@+id/video_name"
                 android:layout_width="0dp"
+                android:singleLine="true"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="10dp"
                 android:layout_weight="1"
@@ -209,5 +210,6 @@
     <!--<启动时的遮罩层>-->
     <include
         android:id="@+id/ll_loading"
-        layout="@layout/ll_loading" />
+        layout="@layout/ll_loading"
+        />
 </RelativeLayout>

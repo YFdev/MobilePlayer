@@ -12,8 +12,8 @@
         <ImageView
             android:id="@+id/img_video_desc"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:src="@drawable/nohistorydata" />
+            android:layout_height="match_parent"/>
+            <!--android:src="@drawable/nohistorydata"-->
 
         <ImageView
             android:layout_width="wrap_content"

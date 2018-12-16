@@ -133,7 +133,7 @@ public class VitamioVideoPlayer extends Activity implements View.OnClickListener
                     tv_current_duration.setText(mUtils.timeToString(currentPosition));
 
                     //更新系统时间
-                    current_time.setText(getSystemTime());
+                    current_time.setText(Utils.getSystemTime());
 
                     //缓冲进度
                     if (isNetUri){
@@ -438,10 +438,6 @@ public class VitamioVideoPlayer extends Activity implements View.OnClickListener
         builder.show();
     }
 
-    public String getSystemTime() {
-        SimpleDateFormat format = new SimpleDateFormat("HH:mm:ss", Locale.CHINA);
-        return format.format(new Date());
-    }
 
     /**
      * 监听卡
@@ -700,6 +696,8 @@ public class VitamioVideoPlayer extends Activity implements View.OnClickListener
 
     @Override
     protected void onDestroy() {
+        //移除所有消息
+        mHandler.removeCallbacksAndMessages(null);
         if (mBatteryChangeReceiver != null){
             unregisterReceiver(mBatteryChangeReceiver);
             mBatteryChangeReceiver = null;

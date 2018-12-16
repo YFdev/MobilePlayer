@@ -4,7 +4,10 @@ package com.elapse.mobileplayer.util;
 import android.content.Context;
 import android.net.TrafficStats;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Formatter;
+import java.util.Locale;
 
 /**
  * Created by YF_lala on 2018/12/10.
@@ -62,5 +65,9 @@ public class Utils {
         lastTotalBytes = nowTotalBytes;
         lastTimeStamp = nowTimeStamp;
         return speed + "kb/s";
+    }
+    public static String getSystemTime() {
+        SimpleDateFormat format = new SimpleDateFormat("HH:mm:ss", Locale.CHINA);
+        return format.format(new Date());
     }
 }

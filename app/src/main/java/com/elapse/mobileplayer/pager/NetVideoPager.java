@@ -3,6 +3,7 @@ package com.elapse.mobileplayer.pager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,11 +15,16 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.elapse.mobileplayer.R;
 import com.elapse.mobileplayer.activity.SystemVideoPlayer;
 import com.elapse.mobileplayer.base.BasePager;
 import com.elapse.mobileplayer.domain.MediaItem;
+import com.elapse.mobileplayer.util.CacheUtils;
 import com.elapse.mobileplayer.util.Constants;
+import com.elapse.mobileplayer.util.Utils;
+import com.elapse.mobileplayer.view.XListView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -30,6 +36,14 @@ import org.xutils.x;
 
 import java.util.ArrayList;
 
+import in.srain.cube.views.ptr.PtrClassicDefaultHeader;
+import in.srain.cube.views.ptr.PtrDefaultHandler;
+import in.srain.cube.views.ptr.PtrFrameLayout;
+import in.srain.cube.views.ptr.PtrHandler;
+import in.srain.cube.views.ptr.PtrUIHandler;
+import in.srain.cube.views.ptr.indicator.PtrIndicator;
+import in.srain.cube.views.ptr.util.PtrLocalDisplay;
+
 /**
  * Created by YF_lala on 2018/12/7.
  * local video
@@ -39,7 +53,7 @@ public class NetVideoPager extends BasePager {
     private static final String TAG = "NetVideoPager";
 
     @ViewInject(R.id.lv_video_pager)
-    private ListView lv_video_pager;
+    private XListView lv_video_pager;
 
     @ViewInject(R.id.tv_no_network)
     private TextView tv_no_network;
@@ -49,8 +63,16 @@ public class NetVideoPager extends BasePager {
 
     @ViewInject(R.id.pb_loading)
     private ProgressBar pb_loading;
+
+//    @ViewInject(R.id.store_house_ptr_frame)
+//    private PtrFrameLayout mPtrFrame;
     //数据集合
     private ArrayList<MediaItem> mMediaItems;
+
+    //适配器
+    private NetVideoPagerAdapter mAdapter;
+    //是否加载更多
+    private boolean isLoadMore;
 
     public NetVideoPager(Context context) {
         super(context);
@@ -59,7 +81,25 @@ public class NetVideoPager extends BasePager {
     @Override
     public View initView() {
         View view = View.inflate(mContext, R.layout.net_video_pager,null);
+        mAdapter = new NetVideoPagerAdapter();
+//        final PtrClassicDefaultHeader header = new PtrClassicDefaultHeader(mContext);
+//        header.setPadding(0, PtrLocalDisplay.dp2px(15), 0, 0);
+//        mPtrFrame.setHeaderView(header);
+//        mPtrFrame.addPtrUIHandler(header);
+//        mPtrFrame.setPtrHandler(new PtrHandler() {
+//            @Override
+//            public boolean checkCanDoRefresh(PtrFrameLayout frame, View content, View header) {
+//                return true;
+//            }
+//
+//            @Override
+//            public void onRefreshBegin(PtrFrameLayout frame) {
+//                mPtrFrame.
+//            }
+//        });
         //初始化
+        lv_video_pager.setPullLoadEnable(true);
+        lv_video_pager.setXListViewListener(new MyXListViewListener());
         x.view().inject(this,view);
         lv_video_pager.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -71,49 +111,133 @@ public class NetVideoPager extends BasePager {
                 Bundle b = new Bundle();
                 b.putSerializable("video_list",mMediaItems);
                 intent.putExtras(b);
-                intent.putExtra("position",position);
+                //position - 1,因为下拉刷新的头也算一个item
+                intent.putExtra("position",position - 1);
                 mContext.startActivity(intent);
             }
         });
         return view;
     }
 
-    @Override
-    public void initData() {
-        super.initData();
+    class MyXListViewListener implements XListView.IXListViewListener {
+
+        @Override
+        public void onRefresh() {
+            getDataFromNet();
+        }
+
+        @Override
+        public void onLoadMore() {
+            getMoreFromNet();
+        }
+    }
+
+    private void getMoreFromNet() {
+
         RequestParams params = new RequestParams(Constants.URL);
         x.http().get(params, new Callback.CommonCallback<String>() {
             @Override
             public void onSuccess(String result) {
                 Log.d(TAG, "onSuccess: ");
+                isLoadMore = true;
                 //主线程
                 processData(result);
             }
 
             @Override
             public void onError(Throwable ex, boolean isOnCallback) {
+                isLoadMore = false;
                 Log.d(TAG, "onError: "+ex.getMessage());
             }
 
             @Override
             public void onCancelled(CancelledException cex) {
+                isLoadMore = false;
                 Log.d(TAG, "onCancelled: "+cex.getMessage());
             }
 
             @Override
             public void onFinished() {
+                isLoadMore = false;
+                Log.d(TAG, "onFinished: ");
+            }
+        });
+    }
+
+    private void onLoad() {
+        lv_video_pager.stopRefresh();
+        lv_video_pager.stopLoadMore();
+        lv_video_pager.setRefreshTime("更新时间"+Utils.getSystemTime());
+    }
+
+    @Override
+    public void initData() {
+        super.initData();
+        String savedJson = CacheUtils.getValue(mContext,Constants.URL);
+        if (!TextUtils.isEmpty(savedJson)){
+            processData(savedJson);
+        }
+        getDataFromNet();
+    }
+
+    private void getDataFromNet() {
+        RequestParams params = new RequestParams(Constants.URL);
+        x.http().get(params, new Callback.CommonCallback<String>() {
+            @Override
+            public void onSuccess(String result) {
+                Log.d(TAG, "onSuccess: ");
+                isLoadMore = true;
+                CacheUtils.putString(mContext,Constants.URL,result);
+                //主线程
+                processData(result);
+            }
+
+            @Override
+            public void onError(Throwable ex, boolean isOnCallback) {
+                isLoadMore = false;
+//                tv_no_network.setVisibility(View.VISIBLE);
+//                ll_loading.setVisibility(View.GONE);
+                showData();
+                Log.d(TAG, "onError: "+ex.getMessage());
+            }
+
+            @Override
+            public void onCancelled(CancelledException cex) {
+                isLoadMore = false;
+                Log.d(TAG, "onCancelled: "+cex.getMessage());
+            }
+
+            @Override
+            public void onFinished() {
+                isLoadMore = false;
                 Log.d(TAG, "onFinished: ");
             }
         });
     }
 
     private void processData(String result) {
-        mMediaItems = parsedJson(result);
+       if (!isLoadMore){
+           mMediaItems = parsedJson(result);
+           showData();
+       }else {
+           //加载更多
+           //要将得到的数据添加到原来的集合中
+           mMediaItems.addAll(parsedJson(result));
+           //刷新适配器
+           mAdapter.notifyDataSetChanged();
+           onLoad();
+           isLoadMore = false;
+       }
+
+    }
+
+    private void showData() {
         if (mMediaItems != null && mMediaItems.size() > 0){
             if (mMediaItems != null && mMediaItems.size()>0){
                 tv_no_network.setVisibility(View.GONE);
                 //set adapter
-                lv_video_pager.setAdapter(new NetVideoPagerAdapter());
+                lv_video_pager.setAdapter(mAdapter);
+                onLoad();
             }else {
                 tv_no_network.setVisibility(View.VISIBLE);
 //                ll_loading.setVisibility(View.GONE);
@@ -193,7 +317,14 @@ public class NetVideoPager extends BasePager {
             MediaItem mediaItem = mMediaItems.get(position);
             holder.tv_name.setText(mediaItem.getName());
             holder.tv_desc.setText(mediaItem.getDesc());
-            x.image().bind(holder.img,mediaItem.getImgUrl());
+            //使用xUtils加载缩略图
+//            x.image().bind(holder.img,mediaItem.getImgUrl());
+            //使用Glide
+            Glide.with(mContext).load(mediaItem.getImgUrl())
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .placeholder(R.drawable.nohistorydata)
+                    .error(R.drawable.nohistorydata)
+                    .into(holder.img);
             return convertView;
         }
     }
