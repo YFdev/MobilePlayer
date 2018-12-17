@@ -11,14 +11,13 @@ import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.elapse.mobileplayer.R;
-import com.elapse.mobileplayer.activity.SystemVideoPlayer;
+import com.elapse.mobileplayer.activity.SystemVideoPlayerActivity;
 import com.elapse.mobileplayer.base.BasePager;
 import com.elapse.mobileplayer.domain.MediaItem;
 import com.elapse.mobileplayer.util.CacheUtils;
@@ -35,14 +34,6 @@ import org.xutils.view.annotation.ViewInject;
 import org.xutils.x;
 
 import java.util.ArrayList;
-
-import in.srain.cube.views.ptr.PtrClassicDefaultHeader;
-import in.srain.cube.views.ptr.PtrDefaultHandler;
-import in.srain.cube.views.ptr.PtrFrameLayout;
-import in.srain.cube.views.ptr.PtrHandler;
-import in.srain.cube.views.ptr.PtrUIHandler;
-import in.srain.cube.views.ptr.indicator.PtrIndicator;
-import in.srain.cube.views.ptr.util.PtrLocalDisplay;
 
 /**
  * Created by YF_lala on 2018/12/7.
@@ -106,7 +97,7 @@ public class NetVideoPager extends BasePager {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 //                MediaItem mediaItem = mMediaItems.get(position);
                 //传递视频列表
-                Intent intent = new Intent(mContext,SystemVideoPlayer.class);
+                Intent intent = new Intent(mContext,SystemVideoPlayerActivity.class);
 //                intent.setDataAndType(Uri.parse(mediaItem.getData()),"video/*");
                 Bundle b = new Bundle();
                 b.putSerializable("video_list",mMediaItems);

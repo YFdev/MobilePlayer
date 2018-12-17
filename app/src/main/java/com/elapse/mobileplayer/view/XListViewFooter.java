@@ -5,7 +5,7 @@
  * @description XListView's footer
  */
 package com.elapse.mobileplayer.view;
-
+import com.elapse.mobileplayer.R;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;

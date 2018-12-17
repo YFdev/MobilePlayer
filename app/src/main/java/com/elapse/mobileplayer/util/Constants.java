@@ -8,8 +8,13 @@ package com.elapse.mobileplayer.util;
 
 public class Constants {
     /**
-     * 网络地址
+     * 视频网络地址
      */
     public static final String URL = "http://api.m.mtime.cn/PageSubArea/TrailerList.api";
-
+    //顺序播放
+    public static final int PLAY_MODE_ORDERED = 1;
+    //随机播放
+    public static final int PLAY_MODE_RANDOM = 2;
+    //单曲循环
+    public static final int PLAY_MODE_CYCLE = 3;
 }

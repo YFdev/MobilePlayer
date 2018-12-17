@@ -105,7 +105,7 @@
                 android:background="@drawable/btn_pause_selector" />
 
             <Button
-                android:id="@+id/btn_forward"
+                android:id="@+id/btn_next"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"

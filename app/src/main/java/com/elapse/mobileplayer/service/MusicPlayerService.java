@@ -1,29 +1,41 @@
 package com.elapse.mobileplayer.service;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.database.Cursor;
+import android.gesture.GestureUtils;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.provider.MediaStore;
+import android.support.annotation.RequiresApi;
 import android.widget.Toast;
 
 import com.elapse.mobileplayer.IMusicPlayerService;
+import com.elapse.mobileplayer.R;
+import com.elapse.mobileplayer.activity.SystemAudioPlayerActivity;
 import com.elapse.mobileplayer.domain.MediaItem;
+import com.elapse.mobileplayer.util.CacheUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
 
 public class MusicPlayerService extends Service {
 
+    private static final String GET_INFO = "com.elapse.mobileplayer_GET_INFO";
     private ArrayList<MediaItem> mMediaItems;
     private int position;
     private MediaItem mediaItem;
     //用于播放音乐
     private MediaPlayer mMediaPlayer;
+    private int mPlayMode;
+    private NotificationManager manager;
 
     public MusicPlayerService() {
     }
@@ -36,6 +48,7 @@ public class MusicPlayerService extends Service {
             service.openAudio(position);
         }
 
+        @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
         @Override
         public void start() throws RemoteException {
             service.start();
@@ -95,12 +108,24 @@ public class MusicPlayerService extends Service {
         public int getPlayMode() throws RemoteException {
             return service.getPlayMode();
         }
-    };
 
+        @Override
+        public boolean isPlaying() throws RemoteException {
+            return service.isPlaying();
+        }
+
+        @Override
+        public void seekTo(int position) throws RemoteException {
+            service.seekTo(position);
+        }
+
+
+    };
 
     @Override
     public void onCreate() {
         super.onCreate();
+        mPlayMode = CacheUtils.getInt(this,"mode");
         //加载音乐列表
         getDataFromLocal();
     }
@@ -150,7 +175,7 @@ public class MusicPlayerService extends Service {
         if (mMediaItems != null && mMediaItems.size() > 0){
             mediaItem = mMediaItems.get(position);//当前播放的音频文件对象
             if (mMediaPlayer != null){
-                mMediaPlayer.release();
+//                mMediaPlayer.release();
                 mMediaPlayer.reset();
             }
             try {
@@ -173,10 +198,22 @@ public class MusicPlayerService extends Service {
 
     class mpOnPrepareListener implements MediaPlayer.OnPreparedListener{
 
+        @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
         @Override
         public void onPrepared(MediaPlayer mp) {
+            //通知Activity获取信息
+            notifyChange(GET_INFO);
             start();
         }
+    }
+
+    /**
+     * 发送准备完成的广播
+     * @param action
+     */
+    private void notifyChange(String action) {
+        Intent intent = new Intent(action);
+        sendBroadcast(intent);
     }
 
     /**
@@ -202,15 +239,31 @@ public class MusicPlayerService extends Service {
     /**
      * 开始播放
      */
+    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
     private void start(){
         mMediaPlayer.start();
+        //前台通知,点击后进入播放器
+        //注意***从前台启动activity会生成多个activity实例，因此activity必须使用SingleTask模式
+        manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        Intent intent = new Intent(this, SystemAudioPlayerActivity.class);
+        intent.putExtra("Notification",true);//标识：来自状态栏
+        PendingIntent pi = PendingIntent.getActivity(this,1,intent,PendingIntent.FLAG_UPDATE_CURRENT);
+        Notification notification = new Notification.Builder(this)
+                .setSmallIcon(R.drawable.icon_music)
+                .setContentText("橙子音乐")
+                .setContentText("正在播放..."+getName())
+                .setContentIntent(pi)
+                .build();
+        manager.notify(1,notification);
     }
 
     /**
      * 暂停音乐
      */
     private void pause(){
-
+        mMediaPlayer.pause();
+        //取消前台通知
+        manager.cancel(1);
     }
 
     /**
@@ -222,47 +275,42 @@ public class MusicPlayerService extends Service {
 
     /**
      * 得到当前播放进度
-     * @return
+     * @return 当前进度
      */
     private int getCurrentPosition(){
-
-        return 0;
+        return mMediaPlayer.getCurrentPosition();
     }
 
     /**
      * 获取时长
-     * @return
+     * @return 时长
      */
     private int getDuration(){
-
-        return 0;
+        return mMediaPlayer.getDuration();
     }
 
     /**
      * 获取歌手
-     * @return
+     * @return 歌手
      */
     private String getArtist(){
-
-        return null;
+        return mediaItem.getArtist();
     }
 
     /**
      * 获取歌曲名
-     * @return
+     * @return 歌曲名
      */
     private String getName(){
-
-        return null;
+        return mediaItem.getName();
     }
 
     /**
      * 获取歌曲路径
-     * @return
+     * @return 歌曲路径
      */
     private String getAudioPath(){
-
-        return null;
+        return mediaItem.getData();
     }
 
     /**
@@ -281,19 +329,31 @@ public class MusicPlayerService extends Service {
 
     /**
      * 设置播放模式
-     * @param mode
+     * @param mode 播放模式
      */
     private void setPlayMode(int mode){
-
+        mPlayMode = mode;
+        CacheUtils.putInt(this,"mode",mPlayMode);
     }
 
     /**
      * 得到播放模式
-     * @return
+     * @return 播放模式
      */
     private int getPlayMode(){
+        return mPlayMode;
+    }
 
-        return 0;
+    /**
+     *
+     */
+    private boolean isPlaying(){
+        return mMediaPlayer.isPlaying();
+    }
+
+    //拖动
+    private void seekTo(int position){
+        mMediaPlayer.seekTo(position);
     }
 }
 

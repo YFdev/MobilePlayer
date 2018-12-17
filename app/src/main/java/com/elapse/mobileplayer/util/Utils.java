@@ -15,8 +15,8 @@ import java.util.Locale;
 
 public class Utils {
 
-    private StringBuilder mFormatBuilder;
-    private Formatter mFormatter;
+    private static StringBuilder mFormatBuilder;
+    private static Formatter mFormatter;
     private long lastTotalBytes;
     private long lastTimeStamp;
     public Utils() {
@@ -24,7 +24,7 @@ public class Utils {
         mFormatter = new Formatter();
     }
 
-    public String timeToString(int timeMills){
+    public static String timeToString(int timeMills){
         int totalSeconds = timeMills / 1000;
         int seconds = totalSeconds % 60;
         int minutes = (totalSeconds / 60) % 60;

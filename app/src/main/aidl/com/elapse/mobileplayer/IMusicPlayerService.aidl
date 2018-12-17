@@ -30,4 +30,8 @@ interface IMusicPlayerService {
         void setPlayMode(int mode);
         // 得到播放模式
         int getPlayMode();
+        //是否在播放
+        boolean isPlaying();
+        //视频拖动
+        void seekTo(int position);
 }

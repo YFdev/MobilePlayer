@@ -7,7 +7,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.AudioManager;
-import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -26,23 +25,23 @@ import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
-import com.elapse.mobileplayer.view.CustomVideoView;
 
 import com.elapse.mobileplayer.R;
 import com.elapse.mobileplayer.domain.MediaItem;
 import com.elapse.mobileplayer.util.Utils;
+import com.elapse.mobileplayer.view.VitamioVideoView;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.Locale;
+
+import io.vov.vitamio.MediaPlayer;
+import io.vov.vitamio.Vitamio;
 
 /**
- * 系统播放器
+ * vitamio 播放器
  * Created by YF_lala on 2018/12/10.
  */
 
-public class SystemVideoPlayer extends Activity implements View.OnClickListener {
+public class VitamioVideoPlayerActivity extends Activity implements View.OnClickListener {
 
     private static final int PROGRESS = 0 ;
     private static final int HIDE_MEDIA_CONTROLLER = 1;
@@ -53,7 +52,7 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener 
     private static final int DEFAULT_SCREEN = 2;
     private static final int GET_NET_WORK_SPEED = 3;
     private Utils mUtils;
-    private CustomVideoView mVideoView;
+    private VitamioVideoView mVideoView;
     //接收intent传递的URI
     private Uri mUri;
     //顶部标题栏
@@ -126,7 +125,7 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener 
             switch (msg.what){
                 case PROGRESS:
                     //得到当前播放进度
-                    int currentPosition = mVideoView.getCurrentPosition();
+                    int currentPosition = (int) mVideoView.getCurrentPosition();
                     seek_bar_video.setProgress(currentPosition);
                     tv_current_duration.setText(mUtils.timeToString(currentPosition));
 
@@ -169,7 +168,7 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener 
                     hideMediaController();
                     break;
                 case GET_NET_WORK_SPEED:
-                    String wifiSpeed = mUtils.getNetWorkSpeed(SystemVideoPlayer.this);
+                    String wifiSpeed = mUtils.getNetWorkSpeed(VitamioVideoPlayerActivity.this);
                     net_work_info.setText("缓冲中..."+wifiSpeed);
                     wifi_speed.setText("正在加载..."+wifiSpeed);
                     // 2秒更新一次
@@ -184,7 +183,8 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.system_player_with_controller);
+        Vitamio.isInitialized(this);
+        setContentView(R.layout.vitamio_player_with_controller);
 
         initView();
         initData();
@@ -333,7 +333,7 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener 
                 videoHeight = mp.getVideoHeight();
                 mVideoView.start();
                 //获得视频总长，关联seekBar
-                int duration = mVideoView.getDuration();
+                int duration = (int) mVideoView.getDuration();
                 seek_bar_video.setMax(duration);
                 tv_duration.setText(mUtils.timeToString(duration));
                 //默认隐藏控制面板
@@ -352,22 +352,16 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener 
         mVideoView.setOnErrorListener(new MediaPlayer.OnErrorListener() {
             @Override
             public boolean onError(MediaPlayer mp, int what, int extra) {
-                Toast.makeText(SystemVideoPlayer.this,"Unknown error",Toast.LENGTH_SHORT).show();
-               //1、格式不支持-->跳转到万能播放器，把数据原封不动传入，关闭系统播放器
-                startVitamioPlayer();
-
-                //2、播放网络视频时，网络中断-->1、网络断了：提示用户网络中断；2、网络断断续续：重试
-
-                //3、播放的时候视频中间有空白-->下载
-
-                return false;
+//                Toast.makeText(VitamioVideoPlayerActivity.this,"Unknown error",Toast.LENGTH_SHORT).show();
+               showErrorDialog();
+                return true;
             }
         });
 
         mVideoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mp) {
-//                Toast.makeText(SystemVideoPlayer.this,"finished",Toast.LENGTH_SHORT).show();
+//                Toast.makeText(SystemVideoPlayerActivity.this,"finished",Toast.LENGTH_SHORT).show();
 //                finish();
                 playNextVideo();
             }
@@ -390,28 +384,56 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener 
     }
 
     /**
-     * a、把数据原封不动的传递
-     * b、关闭系统播放器
+     * 切换到系统播放器
      */
-    private void startVitamioPlayer() {
-        //停止当前播放器，释放
+    private void showSwitchPlayer(){
+        AlertDialog.Builder builder  = new AlertDialog.Builder(this);
+        builder.setTitle("提示");
+        builder.setMessage("当视频花屏时，可尝试切换到系统播放器");
+        builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                startSystemPlayer();
+            }
+        });
+        builder.setNegativeButton("取消",null);
+        builder.show();
+    }
+
+    /**
+     * 切换到系统播放器
+     */
+    private void startSystemPlayer(){
         if (mVideoView != null){
             mVideoView.stopPlayback();
         }
-        Intent intent = new Intent(this,VitamioVideoPlayer.class);
-        if(mMediaItems != null && mMediaItems.size() > 0){
+        Intent intent = new Intent(this,SystemVideoPlayerActivity.class);
+        if (mMediaItems != null && mMediaItems.size() > 0){
             Bundle b = new Bundle();
             b.putSerializable("video_list",mMediaItems);
             intent.putExtras(b);
             intent.putExtra("position",position);
-
         }else if (mUri != null){
             intent.setData(mUri);
         }
         startActivity(intent);
-        finish();//关闭页面
+        finish();
     }
-
+    /**
+     * 播放出错处理
+     */
+    private void showErrorDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("提示");
+        builder.setMessage("抱歉，无法播放该视频");
+        builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                finish();
+            }
+        });
+        builder.show();
+    }
 
 
     /**
@@ -423,7 +445,7 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener 
         public boolean onInfo(MediaPlayer mp, int what, int extra) {
             switch (what){
                 case MediaPlayer.MEDIA_INFO_BUFFERING_START://视频卡、拖动卡
-//                    Toast.makeText(SystemVideoPlayer.this,"卡顿",Toast.LENGTH_SHORT).show();
+//                    Toast.makeText(SystemVideoPlayerActivity.this,"卡顿",Toast.LENGTH_SHORT).show();
                     buffer_layout.setVisibility(View.VISIBLE);
                     break;
                 case MediaPlayer.MEDIA_INFO_BUFFERING_END://视频拖动卡结束
@@ -565,19 +587,6 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener 
         mHandler.sendEmptyMessageDelayed(HIDE_MEDIA_CONTROLLER,3500);
     }
 
-    private void showSwitchPlayer(){
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("提示");
-        builder.setMessage("当播放器无画面时，请切换到万能播放器");
-        builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                startVitamioPlayer();
-            }
-        });
-        builder.setNegativeButton("取消", null);
-        builder.show();
-    }
     /**
      * 视频启停
      */
@@ -784,6 +793,4 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener 
         }
         return super.onKeyDown(keyCode, event);
     }
-
-
 }

@@ -14,13 +14,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import com.elapse.mobileplayer.R;
-import com.elapse.mobileplayer.activity.SystemVideoPlayer;
+import com.elapse.mobileplayer.activity.SystemVideoPlayerActivity;
 import com.elapse.mobileplayer.base.BasePager;
 import com.elapse.mobileplayer.domain.MediaItem;
 import com.elapse.mobileplayer.util.Utils;
@@ -70,14 +69,14 @@ public class VideoPager extends BasePager {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 //                MediaItem mediaItem = mMediaItems.get(position);
                 //跳转到播放页
-//                Intent intent = new Intent(mContext, SystemVideoPlayer.class);
+//                Intent intent = new Intent(mContext, SystemVideoPlayerActivity.class);
 //                intent.setDataAndType(Uri.parse(mediaItem.getData()),"video/*");
 //                mContext.startActivity(intent);
 //                Intent intent1 = new Intent(); //隐式意图
 //                intent1.setDataAndType(Uri.parse(mediaItem.getData()),"video/*");
 //                mContext.startActivity(intent1);
                 //传递视频列表
-                Intent intent = new Intent(mContext,SystemVideoPlayer.class);
+                Intent intent = new Intent(mContext,SystemVideoPlayerActivity.class);
 //                intent.setDataAndType(Uri.parse(mediaItem.getData()),"video/*");
                 Bundle b = new Bundle();
                 b.putSerializable("video_list",mMediaItems);

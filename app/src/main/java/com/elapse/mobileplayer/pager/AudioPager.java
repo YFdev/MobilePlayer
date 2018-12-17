@@ -4,14 +4,11 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
-import android.graphics.Color;
 import android.net.Uri;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.MediaStore;
 import android.text.format.Formatter;
-import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -21,8 +18,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.elapse.mobileplayer.R;
-import com.elapse.mobileplayer.activity.SystemAudioPlayer;
-import com.elapse.mobileplayer.activity.SystemVideoPlayer;
+import com.elapse.mobileplayer.activity.SystemAudioPlayerActivity;
 import com.elapse.mobileplayer.base.BasePager;
 import com.elapse.mobileplayer.domain.MediaItem;
 import com.elapse.mobileplayer.util.Utils;
@@ -71,7 +67,7 @@ public class AudioPager extends BasePager{
         lv_video_pager.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent intent = new Intent(mContext,SystemAudioPlayer.class);
+                Intent intent = new Intent(mContext,SystemAudioPlayerActivity.class);
 //                Bundle b = new Bundle();
 //                b.putSerializable("video_list",mMediaItems);
 //                intent.putExtras(b);
