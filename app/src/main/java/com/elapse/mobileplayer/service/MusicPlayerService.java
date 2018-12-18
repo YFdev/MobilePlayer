@@ -10,6 +10,7 @@ import android.database.Cursor;
 import android.gesture.GestureUtils;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -22,9 +23,13 @@ import com.elapse.mobileplayer.R;
 import com.elapse.mobileplayer.activity.SystemAudioPlayerActivity;
 import com.elapse.mobileplayer.domain.MediaItem;
 import com.elapse.mobileplayer.util.CacheUtils;
+import com.elapse.mobileplayer.util.Constants;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Random;
 
 public class MusicPlayerService extends Service {
 
@@ -187,6 +192,13 @@ public class MusicPlayerService extends Service {
                 mMediaPlayer.setDataSource(mediaItem.getData());
                 mMediaPlayer.prepareAsync();
 
+                if (mPlayMode == Constants.PLAY_MODE_CYCLE){
+                    //不会触发播放完成
+                    mMediaPlayer.setLooping(true);
+                }else {
+                    mMediaPlayer.setLooping(false);
+                }
+
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -202,7 +214,8 @@ public class MusicPlayerService extends Service {
         @Override
         public void onPrepared(MediaPlayer mp) {
             //通知Activity获取信息
-            notifyChange(GET_INFO);
+//            notifyChange(GET_INFO);
+            EventBus.getDefault().post(mediaItem);
             start();
         }
     }
@@ -317,14 +330,86 @@ public class MusicPlayerService extends Service {
      * 播放下一个
      */
     private void next(){
+        //1、根据当前播放模式设置下一个位置
+        setNextPosition();
+        //2、根据当前播放模式和位置播放音乐
+        openNextAudio();
+    }
 
+    private void openNextAudio() {
+//        int playMode = getPlayMode();
+//        if (playMode == Constants.PLAY_MODE_CYCLE){
+//            openAudio(position);
+//        }else if (playMode == Constants.PLAY_MODE_ORDERED){
+//            if (position < mMediaItems.size()){
+//                openAudio(position);
+//            }else {
+//                position = mMediaItems.size() - 1;
+//            }
+//        }else if (playMode == Constants.PLAY_MODE_RANDOM){
+//           openAudio(position);
+//        }
+        openAudio(position);
+    }
+
+    private void setNextPosition() {
+        int playMode = getPlayMode();
+        if (playMode == Constants.PLAY_MODE_CYCLE){
+            position ++;
+            if (position >= mMediaItems.size()){
+                position = 0;
+            }
+        }else if (playMode == Constants.PLAY_MODE_ORDERED){
+            position ++;
+            if (position >= mMediaItems.size()){
+                position = 0;
+            }
+        }else if (playMode == Constants.PLAY_MODE_RANDOM){
+            position = new Random().nextInt(mMediaItems.size() + 1);
+        }
     }
 
     /**
      * 播放上一个
      */
     private void previous(){
+        //根据当前播放模式，设置上一个位置
+        setPrePosition();
+        //根据当前播放模式和位置播放音频
+        openPreAudio();
+    }
 
+    private void openPreAudio() {
+//        int playMode = getPlayMode();
+//        if (playMode == Constants.PLAY_MODE_ORDERED){
+//            if (position >= 0){
+//                openAudio(position);
+//            }else {
+//                position = 0 ;
+//            }
+//        }else if (playMode == Constants.PLAY_MODE_CYCLE){
+//            openAudio(position);
+//        }else if (playMode == Constants.PLAY_MODE_RANDOM){
+//            openAudio(position);
+//        }
+        openAudio(position);
+    }
+
+    private void setPrePosition() {
+        int playMode = getPlayMode();
+        if (playMode == Constants.PLAY_MODE_CYCLE){
+            position -- ;
+            if (position < 0){
+                position = mMediaItems.size() - 1;
+            }
+        }else if (playMode == Constants.PLAY_MODE_ORDERED){
+            position -- ;
+            if (position < 0){
+                position = mMediaItems.size() - 1;
+            }
+        }else if (playMode == Constants.PLAY_MODE_RANDOM){
+            position = new Random().nextInt(mMediaItems.size() + 1);
+        }
     }
 
     /**
@@ -334,6 +419,13 @@ public class MusicPlayerService extends Service {
     private void setPlayMode(int mode){
         mPlayMode = mode;
         CacheUtils.putInt(this,"mode",mPlayMode);
+        //播放模式设置
+        if (mPlayMode == Constants.PLAY_MODE_CYCLE){
+            //不会触发播放完成
+            mMediaPlayer.setLooping(true);
+        }else {
+            mMediaPlayer.setLooping(false);
+        }
     }
 
     /**
@@ -355,5 +447,126 @@ public class MusicPlayerService extends Service {
     private void seekTo(int position){
         mMediaPlayer.seekTo(position);
     }
+
+// 不使用aidl的实现方式
+// private MyBinder mBinder = new MyBinder();
+//
+//    class MyBinder extends Binder{
+//        private void start(){
+//            mMediaPlayer.start();
+//            //前台通知,点击后进入播放器
+//            //注意***从前台启动activity会生成多个activity实例，因此activity必须使用SingleTask模式
+//            manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+//            Intent intent = new Intent(MusicPlayerService.this, SystemAudioPlayerActivity.class);
+//            intent.putExtra("Notification",true);//标识：来自状态栏
+//            PendingIntent pi = PendingIntent.getActivity(this,1,intent,PendingIntent.FLAG_UPDATE_CURRENT);
+//            Notification notification = new Notification.Builder(this)
+//                    .setSmallIcon(R.drawable.icon_music)
+//                    .setContentText("橙子音乐")
+//                    .setContentText("正在播放..."+getName())
+//                    .setContentIntent(pi)
+//                    .build();
+//            manager.notify(1,notification);
+//        }
+//
+//        /**
+//         * 暂停音乐
+//         */
+//        private void pause(){
+//            mMediaPlayer.pause();
+//            //取消前台通知
+//            manager.cancel(1);
+//        }
+//
+//        /**
+//         * 停止音乐
+//         */
+//        private void stop(){
+//            mMediaPlayer.stop();
+//        }
+//
+//        /**
+//         * 得到当前播放进度
+//         * @return 当前进度
+//         */
+//        private int getCurrentPosition(){
+//            return mMediaPlayer.getCurrentPosition();
+//        }
+//
+//        /**
+//         * 获取时长
+//         * @return 时长
+//         */
+//        private int getDuration(){
+//            return mMediaPlayer.getDuration();
+//        }
+//
+//        /**
+//         * 获取歌手
+//         * @return 歌手
+//         */
+//        private String getArtist(){
+//            return mediaItem.getArtist();
+//        }
+//
+//        /**
+//         * 获取歌曲名
+//         * @return 歌曲名
+//         */
+//        private String getName(){
+//            return mediaItem.getName();
+//        }
+//
+//        /**
+//         * 获取歌曲路径
+//         * @return 歌曲路径
+//         */
+//        private String getAudioPath(){
+//            return mediaItem.getData();
+//        }
+//
+//        /**
+//         * 播放下一个
+//         */
+//        private void next(){
+//
+//        }
+//
+//        /**
+//         * 播放上一个
+//         */
+//        private void previous(){
+//
+//        }
+//
+//        /**
+//         * 设置播放模式
+//         * @param mode 播放模式
+//         */
+//        private void setPlayMode(int mode){
+//            mPlayMode = mode;
+//            CacheUtils.putInt(this,"mode",mPlayMode);
+//        }
+//
+//        /**
+//         * 得到播放模式
+//         * @return 播放模式
+//         */
+//        private int getPlayMode(){
+//            return mPlayMode;
+//        }
+//
+//        /**
+//         *
+//         */
+//        private boolean isPlaying(){
+//            return mMediaPlayer.isPlaying();
+//        }
+//
+//        //拖动
+//        private void seekTo(int position){
+//            mMediaPlayer.seekTo(position);
+//        }
+//    }
 }
 

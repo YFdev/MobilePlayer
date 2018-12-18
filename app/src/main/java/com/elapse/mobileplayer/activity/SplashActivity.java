@@ -35,7 +35,7 @@ public class SplashActivity extends Activity {
                 public void run() {
                     startMainActivity();
                 }
-            },2000);
+            },3000);
         }
     }
 
@@ -45,8 +45,15 @@ public class SplashActivity extends Activity {
             case 1:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
                     permissionGranted = true;
+                    mHandler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            startMainActivity();
+                        }
+                    },3000);
                 }else{
                     Toast.makeText(this,"Permission denied !",Toast.LENGTH_SHORT).show();
+                    finish();
                 }
                 break;
         }

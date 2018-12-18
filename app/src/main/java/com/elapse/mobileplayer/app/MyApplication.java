@@ -1,4 +1,4 @@
-package com.elapse.mobileplayer;
+package com.elapse.mobileplayer.app;
 
 import android.app.Application;
 
@@ -6,6 +6,7 @@ import org.xutils.*;
 import org.xutils.BuildConfig;
 
 /**
+ * 自定义application，初始化xUtils
  * Created by YF_lala on 2018/12/14.
  */
 

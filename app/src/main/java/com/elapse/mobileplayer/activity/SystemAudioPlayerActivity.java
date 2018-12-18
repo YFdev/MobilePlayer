@@ -24,9 +24,14 @@ import android.widget.Toast;
 
 import com.elapse.mobileplayer.IMusicPlayerService;
 import com.elapse.mobileplayer.R;
+import com.elapse.mobileplayer.domain.MediaItem;
 import com.elapse.mobileplayer.service.MusicPlayerService;
 import com.elapse.mobileplayer.util.Constants;
 import com.elapse.mobileplayer.util.Utils;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 /**
  * 音乐播放器-->系统
@@ -61,7 +66,7 @@ public class SystemAudioPlayerActivity extends Activity implements View.OnClickL
     private Button btn_next;//下一曲
     private Button btn_lyric;//显示歌词
     //注册广播，用于更新歌曲名以及演唱者
-    private onPrepareBroadcastReceiver receiver;
+//    private onPrepareBroadcastReceiver receiver;
     /**
      * true : 从状态栏进入的
      * false : 不是从状态栏进入的
@@ -145,10 +150,11 @@ public class SystemAudioPlayerActivity extends Activity implements View.OnClickL
 
     private void initData() {
         //注册广播
-        receiver = new onPrepareBroadcastReceiver();
-        IntentFilter filter = new IntentFilter();
-        filter.addAction("com.elapse.mobileplayer_GET_INFO");
-        registerReceiver(receiver,filter);
+//        receiver = new onPrepareBroadcastReceiver();
+//        IntentFilter filter = new IntentFilter();
+//        filter.addAction("com.elapse.mobileplayer_GET_INFO");
+//        registerReceiver(receiver,filter);
+        EventBus.getDefault().register(this);
     }
 
     private void initView() {
@@ -334,23 +340,38 @@ public class SystemAudioPlayerActivity extends Activity implements View.OnClickL
 
     @Override
     protected void onDestroy() {
-        if (receiver != null){
-            unregisterReceiver(receiver);
-            receiver = null;
-        }
+//        if (receiver != null){
+//            unregisterReceiver(receiver);
+//            receiver = null;
+//        }
+        EventBus.getDefault().unregister(this);
         mHandler.removeCallbacksAndMessages(null);
+
+        //解绑服务
+        if (conn != null){
+            unbindService(conn);
+            conn = null;
+        }
         super.onDestroy();
     }
 
     /**
      * 音乐播放器准备好后广播
+     * 用EventBus替代
      */
-    private class onPrepareBroadcastReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            showViewData();
-            checkPlayMode();
-        }
+//    private class onPrepareBroadcastReceiver extends BroadcastReceiver {
+//        @Override
+//        public void onReceive(Context context, Intent intent) {
+//            showViewData();
+//            checkPlayMode();
+//        }
+//    }
+
+    //EventBus订阅方法
+    @Subscribe(threadMode =  ThreadMode.MAIN ,sticky = false ,priority = 0)
+    public void  showData(MediaItem mediaItem){
+        showViewData();
+        checkPlayMode();
     }
 
     private void showViewData() {

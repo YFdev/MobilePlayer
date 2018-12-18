@@ -88,10 +88,11 @@ public class NetVideoPager extends BasePager {
 //                mPtrFrame.
 //            }
 //        });
+
         //初始化
+        x.view().inject(this,view);
         lv_video_pager.setPullLoadEnable(true);
         lv_video_pager.setXListViewListener(new MyXListViewListener());
-        x.view().inject(this,view);
         lv_video_pager.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {

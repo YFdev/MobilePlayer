@@ -51,4 +51,8 @@ note:
 	21、集成jar包和so文件时
 		1、可以将jar包放在libs目录下，so文件放在jniLibs目录下-->原生方式
 		2、可以将jar包和so文件都放在libs目录下，但是需要在build.gradle中添加sourceSet{}块 main{ jniLibs.srcDirs = ['/../../libs']}
+	22、视频播放器的两种做法
+		1、直接使用VideoView
+		2、在Activity中封装service和surfaceView
+	23、EventBus:事件发布/订阅总线，用于替代广播、handler、intent在Fragment/activity/service/线程间传递消息，用于组件之间通信
 		
