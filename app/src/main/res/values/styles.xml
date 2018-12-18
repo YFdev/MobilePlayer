@@ -19,7 +19,7 @@
         <item name="android:textColor">@drawable/text_color_select</item>
     </style>
 
-    <style name="noAnimation_Theme" parent="android:Theme">
+    <style name="noAnimation_Theme" parent="Theme.AppCompat">
         <item name="android:windowAnimationStyle">@style/noAnimation</item>
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowFullscreen">true</item>

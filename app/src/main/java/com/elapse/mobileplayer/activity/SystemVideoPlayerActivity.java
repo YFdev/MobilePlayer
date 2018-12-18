@@ -16,6 +16,7 @@ import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -126,9 +127,9 @@ public class SystemVideoPlayerActivity extends Activity implements View.OnClickL
                     int currentPosition = mVideoView.getCurrentPosition();
                     seek_bar_video.setProgress(currentPosition);
                     tv_current_duration.setText(mUtils.timeToString(currentPosition));
-
+                    Log.d("utils", "handleMessage: "+mUtils.timeToString(currentPosition));
                     //更新系统时间
-                    current_time.setText(Utils.getSystemTime());
+                    current_time.setText(mUtils.getSystemTime());
 
                     //缓冲进度
                     if (isNetUri){
@@ -333,6 +334,7 @@ public class SystemVideoPlayerActivity extends Activity implements View.OnClickL
                 int duration = mVideoView.getDuration();
                 seek_bar_video.setMax(duration);
                 tv_duration.setText(mUtils.timeToString(duration));
+                Log.d("utils", "handleMessage: "+mUtils.timeToString(duration));
                 //默认隐藏控制面板
                 hideMediaController();
                 //发消息更新

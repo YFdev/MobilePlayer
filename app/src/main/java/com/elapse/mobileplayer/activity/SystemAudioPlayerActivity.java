@@ -14,6 +14,7 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.provider.ContactsContract;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -65,6 +66,7 @@ public class SystemAudioPlayerActivity extends Activity implements View.OnClickL
     private Button btn_pauseAndStart;//启停
     private Button btn_next;//下一曲
     private Button btn_lyric;//显示歌词
+    private Utils mUtils;
     //注册广播，用于更新歌曲名以及演唱者
 //    private onPrepareBroadcastReceiver receiver;
     /**
@@ -115,6 +117,7 @@ public class SystemAudioPlayerActivity extends Activity implements View.OnClickL
             }
         }
     };
+
     private Handler mHandler = new Handler(new Handler.Callback() {
         @Override
         public boolean handleMessage(Message msg) {
@@ -125,7 +128,8 @@ public class SystemAudioPlayerActivity extends Activity implements View.OnClickL
                         int currentPosition = mService.getCurrentPosition();
                         //设置seekBar和时间进度
                         sk_music.setProgress(currentPosition);
-                        tv_music_duration.setText(Utils.timeToString(currentPosition)+"/"+duration);
+                        tv_music_duration.setText(mUtils.timeToString(currentPosition)+"/"+duration);
+                        Log.d("utils", "handleMessage: "+mUtils.timeToString(currentPosition)+"/"+duration);
                         //每秒更新一次
                         mHandler.removeMessages(GET_DURATION);
                         mHandler.sendEmptyMessageDelayed(GET_DURATION,1000);
@@ -154,6 +158,7 @@ public class SystemAudioPlayerActivity extends Activity implements View.OnClickL
 //        IntentFilter filter = new IntentFilter();
 //        filter.addAction("com.elapse.mobileplayer_GET_INFO");
 //        registerReceiver(receiver,filter);
+        mUtils = new Utils();
         EventBus.getDefault().register(this);
     }
 
@@ -318,7 +323,8 @@ public class SystemAudioPlayerActivity extends Activity implements View.OnClickL
                 try {
                     mService.seekTo(progress);
                     sk_music.setProgress(progress);
-                    tv_music_duration.setText(Utils.timeToString(progress)+"/"+duration);
+                    tv_music_duration.setText(mUtils.timeToString(progress)+"/"+duration);
+                    Log.d("utils", "onProgressChanged: "+mUtils.timeToString(progress)+"/"+duration);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -379,7 +385,7 @@ public class SystemAudioPlayerActivity extends Activity implements View.OnClickL
             tv_music_name.setText(mService.getName());
             tv_artist.setText(mService.getArtist());
             sk_music.setMax(mService.getDuration());
-            duration = Utils.timeToString(mService.getDuration());
+            duration = mUtils.timeToString(mService.getDuration());
             mHandler.sendEmptyMessage(GET_DURATION);
         } catch (RemoteException e) {
             e.printStackTrace();

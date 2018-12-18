@@ -64,6 +64,7 @@ public class NetVideoPager extends BasePager {
     private NetVideoPagerAdapter mAdapter;
     //是否加载更多
     private boolean isLoadMore;
+    private Utils mUtils;
 
     public NetVideoPager(Context context) {
         super(context);
@@ -159,12 +160,14 @@ public class NetVideoPager extends BasePager {
     private void onLoad() {
         lv_video_pager.stopRefresh();
         lv_video_pager.stopLoadMore();
-        lv_video_pager.setRefreshTime("更新时间"+Utils.getSystemTime());
+        lv_video_pager.setRefreshTime("更新时间"+mUtils.getSystemTime());
     }
 
     @Override
     public void initData() {
         super.initData();
+        mUtils = new Utils();
+//        mMediaItems = new ArrayList<>();
         String savedJson = CacheUtils.getValue(mContext,Constants.URL);
         if (!TextUtils.isEmpty(savedJson)){
             processData(savedJson);
@@ -246,7 +249,7 @@ public class NetVideoPager extends BasePager {
      * @return
      */
     private ArrayList<MediaItem> parsedJson(String result) {
-        ArrayList<MediaItem> mediaItems = new ArrayList<>();
+        mMediaItems = new ArrayList<>();
         try {
             JSONObject jsonObject = new JSONObject(result);
 //            JSONArray array = jsonObject.getJSONArray("trailers");//如果trailers字段不存在，会崩溃
@@ -273,7 +276,7 @@ public class NetVideoPager extends BasePager {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        return mediaItems;
+        return mMediaItems;
     }
 
     class NetVideoPagerAdapter extends BaseAdapter {

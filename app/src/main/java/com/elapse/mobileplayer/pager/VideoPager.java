@@ -10,6 +10,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.provider.MediaStore;
 import android.text.format.Formatter;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -131,6 +132,7 @@ public class VideoPager extends BasePager {
 //            holder.img.setImageResource();
             MediaItem mediaItem = mMediaItems.get(position);
             holder.tv_duration.setText(mUtils.timeToString((int) mediaItem.getDuration()));
+            Log.d("utils", "getView: "+mUtils.timeToString((int) mediaItem.getDuration()));
             holder.tv_name.setText(mediaItem.getName());
             holder.tv_size.setText(Formatter.formatFileSize(mContext,mediaItem.getSize()));
             return convertView;

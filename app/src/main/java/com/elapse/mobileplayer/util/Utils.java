@@ -15,16 +15,16 @@ import java.util.Locale;
 
 public class Utils {
 
-    private static StringBuilder mFormatBuilder;
-    private static Formatter mFormatter;
+    private  StringBuilder mFormatBuilder;
+    private  Formatter mFormatter;
     private long lastTotalBytes;
     private long lastTimeStamp;
     public Utils() {
         mFormatBuilder = new StringBuilder();
-        mFormatter = new Formatter();
+        mFormatter = new Formatter(mFormatBuilder,Locale.getDefault());
     }
 
-    public static String timeToString(int timeMills){
+    public String timeToString(int timeMills){
         int totalSeconds = timeMills / 1000;
         int seconds = totalSeconds % 60;
         int minutes = (totalSeconds / 60) % 60;
@@ -32,8 +32,9 @@ public class Utils {
         mFormatBuilder.setLength(0);
         if (hours > 0){
             return mFormatter.format("%d:%02d:%02d",hours,minutes,seconds).toString();
-        }else
+        }else{
             return mFormatter.format("%02d:%02d",minutes,seconds).toString();
+        }
     }
 
     /**
@@ -66,7 +67,7 @@ public class Utils {
         lastTimeStamp = nowTimeStamp;
         return speed + "kb/s";
     }
-    public static String getSystemTime() {
+    public String getSystemTime() {
         SimpleDateFormat format = new SimpleDateFormat("HH:mm:ss", Locale.CHINA);
         return format.format(new Date());
     }

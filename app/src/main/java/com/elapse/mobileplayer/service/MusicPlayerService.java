@@ -221,13 +221,13 @@ public class MusicPlayerService extends Service {
     }
 
     /**
-     * 发送准备完成的广播
+     * 发送准备完成的广播,用EventBus代替
      * @param action
      */
-    private void notifyChange(String action) {
-        Intent intent = new Intent(action);
-        sendBroadcast(intent);
-    }
+//    private void notifyChange(String action) {
+//        Intent intent = new Intent(action);
+//        sendBroadcast(intent);
+//    }
 
     /**
      * 监听播放完成
