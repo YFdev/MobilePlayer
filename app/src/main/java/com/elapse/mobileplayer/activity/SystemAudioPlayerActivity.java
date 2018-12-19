@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -44,7 +45,7 @@ public class SystemAudioPlayerActivity extends Activity implements View.OnClickL
     //进度更新
     private static final int GET_DURATION = 1;
     //播放器页面帧动画
-    private ImageView img_icon;
+    private ImageView img_anim;
     //点击播放位置
     private int position;
     //aidl
@@ -164,8 +165,10 @@ public class SystemAudioPlayerActivity extends Activity implements View.OnClickL
 
     private void initView() {
         //启动帧动画
-        img_icon = findViewById(R.id.img_bg_music_player);
-
+        img_anim = findViewById(R.id.img_bg_music_player);
+        img_anim.setImageResource(R.drawable.rock);
+        AnimationDrawable drawable = (AnimationDrawable) img_anim.getDrawable();
+        drawable.start();
         //歌曲名
         tv_music_name = findViewById(R.id.tv_music_name);
         //歌唱者
@@ -230,11 +233,15 @@ public class SystemAudioPlayerActivity extends Activity implements View.OnClickL
                         if (mService.isPlaying()){
                             //暂停
                             mService.pause();
+//                            //停止seekbar和走时
+//                            mHandler.removeMessages(GET_DURATION);
                             //按钮设置为播放图标
                             btn_pauseAndStart.setBackgroundResource(R.drawable.btn_play_selector);
                         }else {
                             //播放
                             mService.start();
+//                            //开始seekbar和走时
+//                            mHandler.sendEmptyMessage(GET_DURATION);
                             //按钮设置为暂停图标
                             btn_pauseAndStart.setBackgroundResource(R.drawable.btn_pause_selector);
                         }

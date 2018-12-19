@@ -10,7 +10,6 @@
     tools:context="com.elapse.mobileplayer.activity.SplashActivity">
 
     <ImageView
-        android:id="@+id/iv_login_icon"
         android:layout_width="80dp"
         android:layout_height="80dp"
         android:src="@drawable/bg_btn_logo"/>

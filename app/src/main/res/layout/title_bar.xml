@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="50dp"
+    android:layout_height="40dp"
     android:background="#ff3097fd"
+    android:paddingRight="10dp"
+    android:paddingLeft="10dp"
     android:gravity="center_vertical"
     android:orientation="horizontal">
 
@@ -14,13 +16,14 @@
 
     <TextView
         android:id="@+id/tv_search"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
         android:layout_weight="1"
         android:background="@drawable/search_bg_select"
         android:clickable="true"
+        android:focusable="true"
         android:drawableLeft="@drawable/search_left"
         android:drawablePadding="5dp"
         android:text="全网搜索"
@@ -34,7 +37,7 @@
             android:id="@+id/iv_game"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:drawableLeft="@drawable/ic_banner_game"/>
+            android:drawableLeft="@drawable/ic_topbanner_game"/>
 
         <ImageView
             android:layout_width="6dp"
@@ -48,6 +51,6 @@
         android:layout_marginBottom="8dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/ic_topbanner_clock"/>
+        android:src="@drawable/ic_topbanner_record"/>
 
 </LinearLayout>
