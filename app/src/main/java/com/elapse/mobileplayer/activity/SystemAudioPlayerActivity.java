@@ -8,6 +8,9 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.graphics.drawable.AnimationDrawable;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
+import android.media.audiofx.Visualizer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -29,11 +32,16 @@ import com.elapse.mobileplayer.R;
 import com.elapse.mobileplayer.domain.MediaItem;
 import com.elapse.mobileplayer.service.MusicPlayerService;
 import com.elapse.mobileplayer.util.Constants;
+import com.elapse.mobileplayer.util.LyricParser;
 import com.elapse.mobileplayer.util.Utils;
+import com.elapse.mobileplayer.view.BaseVisualizerView;
+import com.elapse.mobileplayer.view.ShowLyricView;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
+
+import java.io.File;
 
 /**
  * 音乐播放器-->系统
@@ -44,8 +52,14 @@ public class SystemAudioPlayerActivity extends Activity implements View.OnClickL
 
     //进度更新
     private static final int GET_DURATION = 1;
+    //显示歌词
+    private static final int SHOW_LYRIC = 2;
     //播放器页面帧动画
-    private ImageView img_anim;
+//    private ImageView img_anim;
+    //音乐频谱
+    private BaseVisualizerView mBaseVisualizerView;
+    private Visualizer mVisualizer;
+//    private MediaPlayer mMediaPlayer;
     //点击播放位置
     private int position;
     //aidl
@@ -61,6 +75,8 @@ public class SystemAudioPlayerActivity extends Activity implements View.OnClickL
     private SeekBar sk_music;
     //控制栏布局
     private LinearLayout ll_controller;
+    //歌词控件
+    private ShowLyricView mShowLyricView;
     //循环模式
     private Button btn_play_mode;
     private Button btn_previous;//上一曲
@@ -138,6 +154,18 @@ public class SystemAudioPlayerActivity extends Activity implements View.OnClickL
                         e.printStackTrace();
                     }
                     break;
+                case SHOW_LYRIC:
+                    try {
+                        //得到当前进度
+                        int cur_position = mService.getCurrentPosition();
+                        //把进度传到showLyricView控件，计算该高亮的歌词
+                        mShowLyricView.setCurrentIndex(cur_position);
+                        //实时发消息
+                        mHandler.removeMessages(SHOW_LYRIC);
+                        mHandler.sendEmptyMessage(SHOW_LYRIC);
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                    }
             }
             return true;
         }
@@ -147,6 +175,7 @@ public class SystemAudioPlayerActivity extends Activity implements View.OnClickL
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setVolumeControlStream(AudioManager.STREAM_MUSIC);
         setContentView(R.layout.activity_audio_player_with_controller);
         initData();
         initView();
@@ -165,10 +194,12 @@ public class SystemAudioPlayerActivity extends Activity implements View.OnClickL
 
     private void initView() {
         //启动帧动画
-        img_anim = findViewById(R.id.img_bg_music_player);
-        img_anim.setImageResource(R.drawable.rock);
-        AnimationDrawable drawable = (AnimationDrawable) img_anim.getDrawable();
-        drawable.start();
+//        img_anim = findViewById(R.id.img_bg_music_player);
+//        img_anim.setImageResource(R.drawable.rock);
+//        AnimationDrawable drawable = (AnimationDrawable) img_anim.getDrawable();
+//        drawable.start();
+        //音乐频谱
+        mBaseVisualizerView = findViewById(R.id.visualizerview);
         //歌曲名
         tv_music_name = findViewById(R.id.tv_music_name);
         //歌唱者
@@ -185,6 +216,7 @@ public class SystemAudioPlayerActivity extends Activity implements View.OnClickL
         btn_pauseAndStart = findViewById(R.id.btn_pause);//启停
         btn_next = findViewById(R.id.btn_next);//下一曲
         btn_lyric = findViewById(R.id.btn_show_lyric);//显示歌词
+        mShowLyricView = findViewById(R.id.show_lyric_view);//歌词显示控件
         //设置视频拖动
         sk_music.setOnSeekBarChangeListener(new MusicSeekBarChangeListener());
         btn_lyric.setOnClickListener(this);
@@ -192,6 +224,7 @@ public class SystemAudioPlayerActivity extends Activity implements View.OnClickL
         btn_previous.setOnClickListener(this);
         btn_pauseAndStart.setOnClickListener(this);
         btn_next.setOnClickListener(this);
+
     }
 
     private void bindAndStartService() {
@@ -316,6 +349,13 @@ public class SystemAudioPlayerActivity extends Activity implements View.OnClickL
             }else {
                 btn_play_mode.setBackgroundResource(R.drawable.btn_play_mode_selector);
             }
+
+            //校验播放和暂停
+            if (mService.isPlaying()){
+                btn_pauseAndStart.setBackgroundResource(R.drawable.btn_pause_selector);
+            }else {
+                btn_pauseAndStart.setBackgroundResource(R.drawable.btn_play_selector);
+            }
         } catch (RemoteException e) {
             e.printStackTrace();
         }
@@ -350,6 +390,31 @@ public class SystemAudioPlayerActivity extends Activity implements View.OnClickL
 
         }
     }
+    /**
+     * 生成一个VisualizerView对象，使音频频谱的波段能够反映到 VisualizerView上
+     */
+    private void setupVisualizerFxAndUi()
+    {
+        try {
+            int audioSessionid = mService.getAudioSessionId();
+            mVisualizer = new Visualizer(audioSessionid);
+            // 参数内必须是2的位数
+            mVisualizer.setCaptureSize(Visualizer.getCaptureSizeRange()[1]);
+            // 设置允许波形表示，并且捕获它
+            mBaseVisualizerView.setVisualizer(mVisualizer);
+            mVisualizer.setEnabled(true);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    protected void onPause()
+    {
+        super.onPause();
+        if (mVisualizer != null)
+            mVisualizer.release();
+    }
 
     @Override
     protected void onDestroy() {
@@ -383,8 +448,39 @@ public class SystemAudioPlayerActivity extends Activity implements View.OnClickL
     //EventBus订阅方法
     @Subscribe(threadMode =  ThreadMode.MAIN ,sticky = false ,priority = 0)
     public void  showData(MediaItem mediaItem){
+        //发消息，歌词同步
+        showLyric();
         showViewData();
         checkPlayMode();
+        setupVisualizerFxAndUi();
+    }
+
+    private void showLyric() {
+        //用于解析歌词
+        LyricParser parser = new LyricParser();
+        try {
+            String path = mService.getAudioPath();
+            //传入file
+            //mnt/sdcard/audio/beijing.mp3
+            //mnt/sdcard/audio/beijing.lrc
+            path = path.substring(0,path.lastIndexOf("."));
+            File file = new File(path + ".lrc");
+            if (!file.exists()){
+                file = new File(path + ".txt");
+            }
+            if (!file.exists()){
+                Toast.makeText(this,"没有发现歌词文件",Toast.LENGTH_SHORT).show();
+            }
+            parser.readFile(file);//解析歌词
+            mShowLyricView.setLyrics(parser.getLyrics());
+
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+
+        if (parser.isExist()){
+            mHandler.sendEmptyMessage(SHOW_LYRIC);
+        }
     }
 
     private void showViewData() {

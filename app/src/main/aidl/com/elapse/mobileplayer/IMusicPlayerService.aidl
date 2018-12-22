@@ -34,4 +34,6 @@ interface IMusicPlayerService {
         boolean isPlaying();
         //视频拖动
         void seekTo(int position);
+        //获取sessionID
+        int getAudioSessionId();
 }

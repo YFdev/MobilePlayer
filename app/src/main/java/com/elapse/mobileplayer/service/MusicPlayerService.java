@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.gesture.GestureUtils;
 import android.media.MediaPlayer;
+import android.media.audiofx.Visualizer;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
@@ -36,10 +37,13 @@ public class MusicPlayerService extends Service {
     private static final String GET_INFO = "com.elapse.mobileplayer_GET_INFO";
     private ArrayList<MediaItem> mMediaItems;
     private int position;
+    //音乐列表
     private MediaItem mediaItem;
     //用于播放音乐
     private MediaPlayer mMediaPlayer;
+    //控制方式
     private int mPlayMode;
+    //前台广播
     private NotificationManager manager;
 
     public MusicPlayerService() {
@@ -124,7 +128,10 @@ public class MusicPlayerService extends Service {
             service.seekTo(position);
         }
 
-
+        @Override
+        public int getAudioSessionId() throws RemoteException {
+            return service.getAudioSessionId();
+        }
     };
 
     @Override
@@ -284,6 +291,7 @@ public class MusicPlayerService extends Service {
      */
     private void stop(){
         mMediaPlayer.stop();
+        manager.cancel(1);
     }
 
     /**
@@ -365,7 +373,7 @@ public class MusicPlayerService extends Service {
                 position = 0;
             }
         }else if (playMode == Constants.PLAY_MODE_RANDOM){
-            position = new Random().nextInt(mMediaItems.size() + 1);
+            position = new Random().nextInt(mMediaItems.size());
         }
     }
 
@@ -408,7 +416,7 @@ public class MusicPlayerService extends Service {
                 position = mMediaItems.size() - 1;
             }
         }else if (playMode == Constants.PLAY_MODE_RANDOM){
-            position = new Random().nextInt(mMediaItems.size() + 1);
+            position = new Random().nextInt(mMediaItems.size());
         }
     }
 
@@ -448,6 +456,9 @@ public class MusicPlayerService extends Service {
         mMediaPlayer.seekTo(position);
     }
 
+    private int getAudioSessionId(){
+        return mMediaPlayer.getAudioSessionId();
+    }
 // 不使用aidl的实现方式
 // private MyBinder mBinder = new MyBinder();
 //

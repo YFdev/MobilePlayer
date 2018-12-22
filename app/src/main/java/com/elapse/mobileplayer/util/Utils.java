@@ -3,6 +3,7 @@ package com.elapse.mobileplayer.util;
 
 import android.content.Context;
 import android.net.TrafficStats;
+import android.util.TypedValue;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -71,4 +72,5 @@ public class Utils {
         SimpleDateFormat format = new SimpleDateFormat("HH:mm:ss", Locale.CHINA);
         return format.format(new Date());
     }
+
 }

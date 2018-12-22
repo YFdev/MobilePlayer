@@ -1,10 +1,13 @@
 package com.elapse.mobileplayer.activity;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.view.KeyEvent;
 import android.widget.RadioGroup;
+import android.widget.Toast;
 
 import com.elapse.mobileplayer.R;
 import com.elapse.mobileplayer.base.BasePager;
@@ -21,6 +24,8 @@ public class MainActivity extends FragmentActivity {
     private RadioGroup rg_main;
     private ArrayList<BasePager> basePagers;
     private int position;//record page position
+    private boolean isExit;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -74,5 +79,28 @@ public class MainActivity extends FragmentActivity {
             basePager.initData();
         }
         return basePager;
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK){
+            if (position != 0){
+                position = 0;
+                rg_main.check(R.id.rb_video);//首页
+                return true;//返回true 事件不再继续传递
+            }else if (! isExit){
+                isExit = true;
+                Toast.makeText(this,"再按一次退出",Toast.LENGTH_SHORT).show();
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        isExit = false;
+                    }
+                },2000);
+                return true;
+            }
+        }
+        //默认退出
+        return super.onKeyDown(keyCode, event);
     }
 }

@@ -5,23 +5,31 @@
     android:background="@drawable/bg_player_4">
 
     <RelativeLayout
-        android:layout_marginTop="20dp"
+        android:id="@+id/rl_top"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
 
-        <ImageView
+        android:layout_marginTop="20dp">
+
+        <!--<ImageView-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content" -->
+            <!--android:id="@+id/img_bg_music_player"-->
+            <!--android:layout_centerHorizontal="true"-->
+            <!--android:src="@drawable/now_playing_matrix_01"/>-->
+
+        <com.terry.AudioFx.BaseVisualizerView
+            android:id="@+id/visualizerview"
             android:layout_centerHorizontal="true"
-            android:src="@drawable/now_playing_matrix_01"
-            android:id="@+id/img_bg_music_player"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="200dp"
+            android:layout_height="40dp"
             />
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignBottom="@+id/img_bg_music_player"
             android:layout_centerHorizontal="true"
+            android:layout_below="@+id/visualizerview"
             android:gravity="center_horizontal"
             android:orientation="vertical">
 
@@ -29,7 +37,7 @@
                 android:id="@+id/tv_music_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="最爱"
+                android:text="--"
                 android:textColor="#ffffff"
                 android:textSize="16sp" />
 
@@ -37,45 +45,48 @@
                 android:id="@+id/tv_artist"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="周慧敏"
+                android:text="---"
                 android:textColor="#ffffff"
                 android:textSize="12sp" />
         </LinearLayout>
     </RelativeLayout>
 
     <LinearLayout
+        android:id="@+id/ll_bottom"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:gravity="center_horizontal"
         android:layout_marginBottom="5dp"
+        android:gravity="center_horizontal"
         android:orientation="vertical">
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_marginRight="20dp"
+            android:layout_height="wrap_content"
             android:layout_marginLeft="20dp"
-            android:layout_height="wrap_content">
+            android:layout_marginRight="20dp">
+
             <TextView
                 android:id="@+id/tv_music_duration"
                 android:layout_width="wrap_content"
-                android:textColor="#ffffff"
-                android:textSize="16sp"
-                android:text="00:00/00:00"
+                android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
-                android:layout_height="wrap_content" />
+                android:text="00:00/00:00"
+                android:textColor="#ffffff"
+                android:textSize="16sp" />
         </RelativeLayout>
+
         <SeekBar
             android:id="@+id/sk_music"
-            android:layout_marginRight="20dp"
-            android:layout_marginLeft="20dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
             android:maxHeight="5dp"
             android:minHeight="5dp"
             android:progress="0"
             android:progressDrawable="@drawable/seekbar_progress_horizontal"
-            android:thumb="@drawable/progress_dot_normal"/>
+            android:thumb="@drawable/progress_dot_normal" />
 
         <LinearLayout
             android:id="@+id/ll_controller"
@@ -110,7 +121,6 @@
                 android:id="@+id/btn_next"
                 android:layout_width="50dp"
                 android:layout_height="30dp"
-
                 android:background="@drawable/btn_forward_selector" />
 
             <Button
@@ -122,5 +132,11 @@
         </LinearLayout>
     </LinearLayout>
 
+    <com.elapse.mobileplayer.view.ShowLyricView
+        android:id="@+id/show_lyric_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/rl_top"
+        android:layout_above="@id/ll_bottom"/>
 
 </RelativeLayout>
