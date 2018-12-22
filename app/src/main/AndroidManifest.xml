@@ -275,6 +275,7 @@
                 <action android:name="com.elapse.mobileplayer_OPENAUDIO"/>
             </intent-filter>
         </service>
+        <activity android:name=".activity.SearchActivity"/>
     </application>
 
 </manifest>

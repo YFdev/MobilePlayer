@@ -18,21 +18,25 @@
         android:layout_weight="1"
         android:background="@drawable/search_bg_select"
         android:clickable="true"
-        android:focusable="true"
         android:drawableLeft="@drawable/search_left"
         android:drawablePadding="5dp"
+        android:focusable="true"
         android:text="全网搜索"
         android:textColor="@drawable/search_text_color" />
+
     <RelativeLayout
         android:id="@+id/rl_game"
-        android:padding="10dp"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:padding="10dp">
+
         <TextView
             android:id="@+id/iv_game"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:drawableLeft="@drawable/ic_topbanner_game"/>
+            android:clickable="true"
+            android:focusable="true"
+            android:drawableLeft="@drawable/ic_topbanner_game" />
 
         <ImageView
             android:layout_width="6dp"
@@ -40,11 +44,14 @@
             android:layout_alignRight="@+id/iv_game"
             android:background="@drawable/do_game" />
     </RelativeLayout>
+
     <ImageView
         android:id="@+id/iv_history"
-        android:padding="8dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/ic_topbanner_record"/>
+        android:clickable="true"
+        android:focusable="true"
+        android:padding="8dp"
+        android:src="@drawable/ic_topbanner_record" />
 
 </LinearLayout>

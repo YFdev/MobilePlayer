@@ -6,7 +6,10 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.view.KeyEvent;
+import android.view.View;
+import android.widget.ImageView;
 import android.widget.RadioGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.elapse.mobileplayer.R;
@@ -19,11 +22,15 @@ import com.elapse.mobileplayer.pager.VideoPager;
 
 import java.util.ArrayList;
 
-public class MainActivity extends FragmentActivity {
+public class MainActivity extends FragmentActivity implements View.OnClickListener{
 
+    //底部布局
     private RadioGroup rg_main;
+    //页面集合
     private ArrayList<BasePager> basePagers;
+    //页面位置
     private int position;//record page position
+    //标记是否退出，用于实现再按一次退出
     private boolean isExit;
 
     @Override
@@ -39,6 +46,11 @@ public class MainActivity extends FragmentActivity {
         basePagers.add(new NetAudioPager(this));//net audio
         rg_main.setOnCheckedChangeListener(new MyOnCheckChangeListener());
         rg_main.check(R.id.rb_video);
+    }
+
+    @Override
+    public void onClick(View v) {
+
     }
 
     class MyOnCheckChangeListener implements RadioGroup.OnCheckedChangeListener{
