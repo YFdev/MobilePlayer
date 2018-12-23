@@ -2,6 +2,9 @@ package com.elapse.mobileplayer.app;
 
 import android.app.Application;
 
+import com.iflytek.cloud.SpeechConstant;
+import com.iflytek.cloud.SpeechUtility;
+
 import org.xutils.*;
 import org.xutils.BuildConfig;
 
@@ -17,5 +20,6 @@ public class MyApplication extends Application {
         super.onCreate();
         x.Ext.init(this);
         x.Ext.setDebug(BuildConfig.DEBUG);
+        SpeechUtility.createUtility(getApplicationContext(), SpeechConstant.APPID +"=5c1e2954");
     }
 }
