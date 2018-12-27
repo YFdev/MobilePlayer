@@ -18,7 +18,7 @@
             <!--android:layout_centerHorizontal="true"-->
             <!--android:src="@drawable/now_playing_matrix_01"/>-->
 
-        <com.terry.AudioFx.BaseVisualizerView
+        <com.elapse.mobileplayer.view.BaseVisualizerView
             android:id="@+id/visualizerview"
             android:layout_centerHorizontal="true"
             android:layout_width="200dp"

@@ -19,10 +19,11 @@ import com.elapse.mobileplayer.pager.NetAudioPager;
 import com.elapse.mobileplayer.pager.NetVideoPager;
 import com.elapse.mobileplayer.pager.Pager_frag;
 import com.elapse.mobileplayer.pager.VideoPager;
+import com.elapse.mobileplayer.view.TitleBar;
 
 import java.util.ArrayList;
 
-public class MainActivity extends FragmentActivity implements View.OnClickListener{
+public class MainActivity extends FragmentActivity {
 
     //底部布局
     private RadioGroup rg_main;
@@ -33,12 +34,14 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
     //标记是否退出，用于实现再按一次退出
     private boolean isExit;
 
+//    private TitleBar mTitleBar;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         rg_main = findViewById(R.id.rg_main);
-
+//        mTitleBar = findViewById(R.id.title_bar);
         basePagers = new ArrayList<>();
         basePagers.add(new VideoPager(this));//local video
         basePagers.add(new AudioPager(this));//local audio
@@ -48,10 +51,6 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         rg_main.check(R.id.rb_video);
     }
 
-    @Override
-    public void onClick(View v) {
-
-    }
 
     class MyOnCheckChangeListener implements RadioGroup.OnCheckedChangeListener{
 
