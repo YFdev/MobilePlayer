@@ -352,9 +352,9 @@ public class SystemAudioPlayerActivity extends Activity implements View.OnClickL
 
             //校验播放和暂停
             if (mService.isPlaying()){
-                btn_pauseAndStart.setBackgroundResource(R.drawable.btn_pause_selector);
-            }else {
                 btn_pauseAndStart.setBackgroundResource(R.drawable.btn_play_selector);
+            }else {
+                btn_pauseAndStart.setBackgroundResource(R.drawable.btn_pause_selector);
             }
         } catch (RemoteException e) {
             e.printStackTrace();

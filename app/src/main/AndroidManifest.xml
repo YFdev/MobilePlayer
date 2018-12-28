@@ -285,7 +285,9 @@
                 <action android:name="com.elapse.mobileplayer_OPENAUDIO"/>
             </intent-filter>
         </service>
-        <activity android:name=".activity.SearchActivity"/>
+        <activity android:name=".activity.SearchActivity">
+            <meta-data android:name="IFLYTEK_APPKEY" android:value="5c1e2954"/>
+        </activity>
     </application>
 
 </manifest>

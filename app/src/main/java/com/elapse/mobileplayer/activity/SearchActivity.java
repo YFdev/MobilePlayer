@@ -1,11 +1,15 @@
 package com.elapse.mobileplayer.activity;
 
+import android.Manifest;
 import android.app.Activity;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.TextureView;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -17,14 +21,12 @@ import android.widget.Toast;
 import com.elapse.mobileplayer.R;
 import com.elapse.mobileplayer.adapter.Search_Adapter;
 import com.elapse.mobileplayer.domain.SearchBean;
-import com.elapse.mobileplayer.util.CacheUtils;
 import com.elapse.mobileplayer.util.Constants;
 import com.elapse.mobileplayer.util.JsonParser;
 import com.google.gson.Gson;
 import com.iflytek.cloud.ErrorCode;
 import com.iflytek.cloud.InitListener;
 import com.iflytek.cloud.RecognizerResult;
-import com.iflytek.cloud.SpeechConstant;
 import com.iflytek.cloud.SpeechError;
 import com.iflytek.cloud.ui.RecognizerDialog;
 import com.iflytek.cloud.ui.RecognizerDialogListener;
@@ -67,18 +69,18 @@ public class SearchActivity extends Activity implements View.OnClickListener{
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
-        initDialog();
         initView();
+        initDialog();
     }
 
     private void initDialog() {
         //1、创建RecognizerDialog
         dialog = new RecognizerDialog(this,new MyInitListener());
-        //2、设置参数
+//        //2、设置参数
 //        dialog.setParameter(SpeechConstant.LANGUAGE,"zh_cn");//普通话
 //        dialog.setParameter(SpeechConstant.ACCENT,"mandarin");
-        //3、设置回调接口
-        dialog.setListener(new MyRecognizerDialogListener());
+//        //3、设置回调接口
+//        dialog.setListener(new MyRecognizerDialogListener());
     }
 
     private void initView() {
@@ -101,11 +103,40 @@ public class SearchActivity extends Activity implements View.OnClickListener{
     public void onClick(View v) {
         switch (v.getId()){
             case R.id.iv_microphone://语音输入
-                showDialog();
+                if (reqPermissionSucceed()){
+                    showDialog();
+                }else {
+                    Toast.makeText(SearchActivity.this,"无法访问麦克风",
+                            Toast.LENGTH_SHORT).show();
+                }
                 break;
             case R.id.btn_search://搜索
                 //网络搜索
                 searchNewsFromNet();
+                break;
+        }
+    }
+
+    private boolean reqPermissionSucceed() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) !=
+                PackageManager.PERMISSION_GRANTED){
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.RECORD_AUDIO},2);
+        }else {
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode){
+            case 2:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                    showDialog();
+                }else {
+                    Toast.makeText(this,"无法访问麦克风",Toast.LENGTH_SHORT).show();
+                }
                 break;
         }
     }
@@ -179,7 +210,12 @@ public class SearchActivity extends Activity implements View.OnClickListener{
     }
 
     private void showDialog() {
-        dialog.show();//Attempt to invoke virtual method 'boolean com.iflytek.cloud.SpeechRecognizer.setParameter(java.lang.String, java.lang.String)' on a null object reference
+        //2、设置参数
+//        dialog.setParameter(SpeechConstant.LANGUAGE,"zh_cn");//普通话
+//        dialog.setParameter(SpeechConstant.ACCENT,"mandarin");
+        //3、设置回调接口
+        dialog.setListener(new MyRecognizerDialogListener());
+        dialog.show();// Attempt to invoke virtual method 'boolean com.iflytek.cloud.SpeechRecognizer.setParameter(java.lang.String, java.lang.String)' on a null object reference
     }
 
     class  MyInitListener implements InitListener{
