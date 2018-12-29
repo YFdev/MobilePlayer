@@ -286,7 +286,7 @@
             </intent-filter>
         </service>
         <activity android:name=".activity.SearchActivity">
-            <meta-data android:name="IFLYTEK_APPKEY" android:value="5c1e2954"/>
+            <!--<meta-data android:name="IFLYTEK_APPKEY" android:value="5c1e2954"/>-->
         </activity>
     </application>
 

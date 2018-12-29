@@ -24,10 +24,13 @@ import com.elapse.mobileplayer.domain.SearchBean;
 import com.elapse.mobileplayer.util.Constants;
 import com.elapse.mobileplayer.util.JsonParser;
 import com.google.gson.Gson;
+
 import com.iflytek.cloud.ErrorCode;
 import com.iflytek.cloud.InitListener;
 import com.iflytek.cloud.RecognizerResult;
+import com.iflytek.cloud.SpeechConstant;
 import com.iflytek.cloud.SpeechError;
+import com.iflytek.cloud.SpeechRecognizer;
 import com.iflytek.cloud.ui.RecognizerDialog;
 import com.iflytek.cloud.ui.RecognizerDialogListener;
 
@@ -59,6 +62,7 @@ public class SearchActivity extends Activity implements View.OnClickListener{
     private ProgressBar progressBar;//进度提示
     private ListView listView;//结果列表
     private TextView noData;//未返回信息
+    private SpeechRecognizer mSpeechRecognizer;
 
     private  RecognizerDialog dialog;
     private HashMap<String, String> mIatResults = new LinkedHashMap<String, String>();
@@ -69,19 +73,22 @@ public class SearchActivity extends Activity implements View.OnClickListener{
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
+
+//        initDialog();
         initView();
-        initDialog();
     }
 
-    private void initDialog() {
-        //1、创建RecognizerDialog
-        dialog = new RecognizerDialog(this,new MyInitListener());
-//        //2、设置参数
-//        dialog.setParameter(SpeechConstant.LANGUAGE,"zh_cn");//普通话
-//        dialog.setParameter(SpeechConstant.ACCENT,"mandarin");
-//        //3、设置回调接口
+//    private void initDialog() {
+//        MyInitListener listener = new MyInitListener();
+//        mSpeechRecognizer = SpeechRecognizer.createRecognizer(this, listener);
+////        //2、设置参数
+//        mSpeechRecognizer.setParameter(SpeechConstant.LANGUAGE,"zh_cn");//普通话
+//        mSpeechRecognizer.setParameter(SpeechConstant.ACCENT,"mandarin");
+//        //1、创建RecognizerDialog
+//        dialog = new RecognizerDialog(this,listener);
+////        //3、设置回调接口
 //        dialog.setListener(new MyRecognizerDialogListener());
-    }
+//    }
 
     private void initView() {
         tv_search_input = findViewById(R.id.tv_search_input);
@@ -210,15 +217,24 @@ public class SearchActivity extends Activity implements View.OnClickListener{
     }
 
     private void showDialog() {
+        MyInitListener listener = new MyInitListener();
+        mSpeechRecognizer = SpeechRecognizer.createRecognizer(this, listener);
+//        //2、设置参数
+        mSpeechRecognizer.setParameter(SpeechConstant.LANGUAGE,"zh_cn");//普通话
+        mSpeechRecognizer.setParameter(SpeechConstant.ACCENT,"mandarin");
+        //1、创建RecognizerDialog
+        dialog = new RecognizerDialog(this,listener);
+//        //3、设置回调接口
+        dialog.setListener(new MyRecognizerDialogListener());
         //2、设置参数
 //        dialog.setParameter(SpeechConstant.LANGUAGE,"zh_cn");//普通话
 //        dialog.setParameter(SpeechConstant.ACCENT,"mandarin");
         //3、设置回调接口
-        dialog.setListener(new MyRecognizerDialogListener());
+//        dialog.setListener(new MyRecognizerDialogListener());
         dialog.show();// Attempt to invoke virtual method 'boolean com.iflytek.cloud.SpeechRecognizer.setParameter(java.lang.String, java.lang.String)' on a null object reference
     }
 
-    class  MyInitListener implements InitListener{
+    class  MyInitListener implements InitListener {
 
         @Override
         public void onInit(int i) {
