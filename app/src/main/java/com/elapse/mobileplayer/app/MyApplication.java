@@ -21,7 +21,7 @@ public class MyApplication extends Application {
     public void onCreate() {
         //出现bug的原因是初始化失败
         SpeechUtility utility = SpeechUtility.createUtility(MyApplication.this,
-                "appid=" + getString(R.string.app_id));
+                "appid=" + getString(R.string.app_id));//组件未安装.(错误码:21002)
         super.onCreate();
         if (utility != null){
             Log.d("utility", "onCreate: succeed");

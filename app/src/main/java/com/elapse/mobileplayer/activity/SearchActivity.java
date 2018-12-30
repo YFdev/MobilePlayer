@@ -155,7 +155,7 @@ public class SearchActivity extends Activity implements View.OnClickListener{
         String text = tv_search_input.getText().toString().trim();
         if (!TextUtils.isEmpty(text)){
             try {
-                text = URLEncoder.encode(text,"utf-8");
+//                text = URLEncoder.encode(text,"utf-8");
                 url = Constants.URL_SEARCH + text;
                 //获取缓存
 //                String result = CacheUtils.getValue(this,url);
@@ -164,7 +164,7 @@ public class SearchActivity extends Activity implements View.OnClickListener{
 //                    mAdapter.notifyDataSetChanged();
 //                }
                 getDataFromNet(url);
-            } catch (UnsupportedEncodingException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
@@ -173,12 +173,15 @@ public class SearchActivity extends Activity implements View.OnClickListener{
     private void getDataFromNet(String url) {
 //         final String key = url;
         //显示进度
+        noData.setVisibility(View.GONE);
         progressBar.setVisibility(View.VISIBLE);
+
         //网络请求
         RequestParams params = new RequestParams(url);
         x.http().get(params, new Callback.CommonCallback<String>() {
             @Override
             public void onSuccess(String result) {
+                Log.d(TAG, "onSuccess: "+result);
                 //缓存
 //                CacheUtils.putString(SearchActivity.this,key,result);
                 SearchBean bean = processData(result);
@@ -190,6 +193,7 @@ public class SearchActivity extends Activity implements View.OnClickListener{
                     noData.setVisibility(View.GONE);
                 }else {
                     progressBar.setVisibility(View.GONE);
+                    noData.setText("没有您要搜索的内容...");
                     noData.setVisibility(View.VISIBLE);
                 }
             }
@@ -219,9 +223,10 @@ public class SearchActivity extends Activity implements View.OnClickListener{
     private void showDialog() {
         MyInitListener listener = new MyInitListener();
         mSpeechRecognizer = SpeechRecognizer.createRecognizer(this, listener);
-//        //2、设置参数
+//        //2、设置参数 特朗普
         mSpeechRecognizer.setParameter(SpeechConstant.LANGUAGE,"zh_cn");//普通话
         mSpeechRecognizer.setParameter(SpeechConstant.ACCENT,"mandarin");
+        mSpeechRecognizer.setParameter(SpeechConstant.ASR_PTT,"0");
         //1、创建RecognizerDialog
         dialog = new RecognizerDialog(this,listener);
 //        //3、设置回调接口

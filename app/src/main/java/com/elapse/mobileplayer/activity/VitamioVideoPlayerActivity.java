@@ -20,6 +20,7 @@ import android.view.GestureDetector;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -740,7 +741,7 @@ public class VitamioVideoPlayerActivity extends Activity implements View.OnClick
         }
     }
 
-//    private float startX;
+    private float startX;
     private float startY;
     private float distanceY;
     private int mVolume;
@@ -751,7 +752,7 @@ public class VitamioVideoPlayerActivity extends Activity implements View.OnClick
         //滑动改变视频音量
         switch (event.getAction()){
             case MotionEvent.ACTION_DOWN:
-//                startX = event.getX();
+                startX = event.getX();
                 startY = event.getY();
                 mVolume = am.getStreamVolume(AudioManager.STREAM_MUSIC);
                 distanceY = Math.min(screenWidth,screenHeight);
@@ -759,11 +760,26 @@ public class VitamioVideoPlayerActivity extends Activity implements View.OnClick
                 break;
             case MotionEvent.ACTION_MOVE:
                 float endY = event.getY();
-                float distance = startY - endY;
-                float deltaVolume  = (distance/distanceY) * maxVolume;
-                int volume = (int) Math.min(Math.max(0,mVolume + deltaVolume),maxVolume);
-                if (deltaVolume != 0){
-                    updateVolume(volume,isMute);
+                float endX = event.getX();
+                float distanceY = startY - endY;
+
+                if (endX < screenWidth / 2){
+                    //左侧，调节亮度
+                    final double FLING_MIN_DISTANCE = 0.5;
+                    final double FLING_MIN_VELOCITY = 0.5;
+                    if (startY - endY > FLING_MIN_DISTANCE && Math.abs(distanceY) > FLING_MIN_VELOCITY){
+                        setBrightness(20);
+                    }
+                    if (startY - endY < FLING_MIN_DISTANCE && Math.abs(distanceY) > FLING_MIN_VELOCITY){
+                        setBrightness(-20);
+                    }
+                }else {
+                    //右侧，调节声音
+                    float deltaVolume  = (distanceY/distanceY) * maxVolume;
+                    int volume = (int) Math.min(Math.max(0,mVolume + deltaVolume),maxVolume);
+                    if (deltaVolume != 0){
+                        updateVolume(volume,isMute);
+                    }
                 }
                 break;
             case MotionEvent.ACTION_UP:
@@ -772,7 +788,17 @@ public class VitamioVideoPlayerActivity extends Activity implements View.OnClick
         }
         return super.onTouchEvent(event);
     }
-
+    //调节屏幕亮度
+    private void setBrightness(int brightness) {
+        WindowManager.LayoutParams lp = getWindow().getAttributes();
+        lp.screenBrightness = lp.screenBrightness + brightness / 255.0f;
+        if (lp.screenBrightness > 1){
+            lp.screenBrightness = 1;
+        }else if (lp.screenBrightness < 0.2f){
+            lp.screenBrightness = 0.2f;
+        }
+        getWindow().setAttributes(lp);
+    }
     /**
      * 监听物理键，调节音量大小
      * @param keyCode

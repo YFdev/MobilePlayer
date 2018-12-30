@@ -69,7 +69,6 @@
             android:layout_height="wrap_content"
             android:textSize="12sp"
             android:layout_centerInParent="true"
-            android:text="没有您要搜索的内容..."
             android:visibility="gone" />
     </RelativeLayout>
 </LinearLayout>

@@ -21,6 +21,7 @@ import android.view.GestureDetector;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -727,7 +728,7 @@ public class SystemVideoPlayerActivity extends Activity implements View.OnClickL
         }
     }
 
-//    private float startX;
+    private float startX;
     private float startY;
     private float distanceY;
     private int mVolume;
@@ -738,7 +739,7 @@ public class SystemVideoPlayerActivity extends Activity implements View.OnClickL
         //滑动改变视频音量
         switch (event.getAction()){
             case MotionEvent.ACTION_DOWN:
-//                startX = event.getX();
+                startX = event.getX();
                 startY = event.getY();
                 mVolume = am.getStreamVolume(AudioManager.STREAM_MUSIC);
                 distanceY = Math.min(screenWidth,screenHeight);
@@ -746,18 +747,45 @@ public class SystemVideoPlayerActivity extends Activity implements View.OnClickL
                 break;
             case MotionEvent.ACTION_MOVE:
                 float endY = event.getY();
-                float distance = startY - endY;
-                float deltaVolume  = (distance/distanceY) * maxVolume;
-                int volume = (int) Math.min(Math.max(0,mVolume + deltaVolume),maxVolume);
-                if (deltaVolume != 0){
-                    updateVolume(volume,isMute);
+                float endX = event.getX();
+                float distanceY = startY - endY;
+
+                if (endX < screenWidth / 2){
+                    //左侧，调节亮度
+                    final double FLING_MIN_DISTANCE = 0.5;
+                    final double FLING_MIN_VELOCITY = 0.5;
+                    if (startY - endY > FLING_MIN_DISTANCE && Math.abs(distanceY) > FLING_MIN_VELOCITY){
+                        setBrightness(20);
+                    }
+                    if (startY - endY < FLING_MIN_DISTANCE && Math.abs(distanceY) > FLING_MIN_VELOCITY){
+                        setBrightness(-20);
+                    }
+                }else {
+                    //右侧，调节声音
+                    float deltaVolume  = (distanceY/distanceY) * maxVolume;
+                    int volume = (int) Math.min(Math.max(0,mVolume + deltaVolume),maxVolume);
+                    if (deltaVolume != 0){
+                        updateVolume(volume,isMute);
+                    }
                 }
+
                 break;
             case MotionEvent.ACTION_UP:
                 mHandler.sendEmptyMessageDelayed(HIDE_MEDIA_CONTROLLER,3500);
                 break;
         }
         return super.onTouchEvent(event);
+    }
+    //调节屏幕亮度
+    private void setBrightness(int brightness) {
+        WindowManager.LayoutParams lp = getWindow().getAttributes();
+        lp.screenBrightness = lp.screenBrightness + brightness / 255.0f;
+        if (lp.screenBrightness > 1){
+            lp.screenBrightness = 1;
+        }else if (lp.screenBrightness < 0.2f){
+            lp.screenBrightness = 0.2f;
+        }
+        getWindow().setAttributes(lp);
     }
 
     /**
