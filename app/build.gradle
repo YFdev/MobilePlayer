@@ -42,4 +42,6 @@ dependencies {
     implementation files('libs/Msc.jar')
     implementation 'com.google.code.gson:gson:2.8.0'
     implementation files('libs/Sunflower.jar')
+    implementation project(':jiaozivideoplayer')
+    implementation files('libs/classes.jar')
 }

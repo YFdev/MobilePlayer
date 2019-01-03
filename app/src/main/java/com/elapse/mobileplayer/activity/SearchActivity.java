@@ -73,7 +73,6 @@ public class SearchActivity extends Activity implements View.OnClickListener{
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
-
 //        initDialog();
         initView();
     }
@@ -188,18 +187,19 @@ public class SearchActivity extends Activity implements View.OnClickListener{
                 items.clear();//发起请求前清空
                 items = bean.getResult();
                 if (items != null && items.size() > 0){
-                    progressBar.setVisibility(View.GONE);
-                    mAdapter.notifyDataSetChanged();
                     noData.setVisibility(View.GONE);
+                    mAdapter.notifyDataSetChanged();
                 }else {
-                    progressBar.setVisibility(View.GONE);
-                    noData.setText("没有您要搜索的内容...");
+                    mAdapter.notifyDataSetChanged();
                     noData.setVisibility(View.VISIBLE);
+                    noData.setText("没有您要搜索的内容...");
                 }
+                progressBar.setVisibility(View.GONE);
             }
 
             @Override
             public void onError(Throwable ex, boolean isOnCallback) {
+                Log.d(TAG, "onError: "+ex.getMessage());
                 noData.setText("出错了....");
                 noData.setVisibility(View.VISIBLE);
             }
