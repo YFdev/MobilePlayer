@@ -85,10 +85,11 @@ public class Net_Audio_Adapter extends BaseAdapter {
         switch (itemType) {
             case TYPE_VIDEO://视频
                 bindData(holder, item);
-                //第一个参数是视频播放地址，第二个参数是显示封面的地址，第三参数是标题
+                //第一个参数是视频播放地址，第二个参数是标题，第三参数是视频尺寸
                 holder.jcv_videoplayer.setUp(item.getVideo().getVideo().get(0),
-                        item.getVideo().getThumbnail().get(0),
-                        Jzvd.SCREEN_WINDOW_TINY);
+                        " ",
+                        Jzvd.SCREEN_WINDOW_NORMAL);
+                Glide.with(mContext).load(item.getVideo().getThumbnail().get(0)).into(holder.jcv_videoplayer.thumbImageView);
                 holder.tv_play_nums.setText(item.getVideo().getPlaycount() + "次播放");
                 holder.tv_video_duration.setText(utils.timeToString(
                         item.getVideo().getDuration() * 1000) + "");
@@ -291,7 +292,5 @@ public class Net_Audio_Adapter extends BaseAdapter {
         Button btn_install;
 //        TextView iv_image_icon;
         //TextView tv_context;
-
-
     }
 }

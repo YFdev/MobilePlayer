@@ -52,7 +52,8 @@
                 android:layout_width="20dp"
                 android:layout_height="20dp"
                 android:layout_marginRight="4dp"
-                android:background="@drawable/shenhe_ding_pic_selector" />
+                android:background="@drawable/shenhe_ding_pic_selector"
+                android:textSize="12sp" />
 
             <TextView
                 android:id="@+id/tv_shenhe_ding_number"
@@ -61,7 +62,8 @@
                 android:gravity="center"
                 android:paddingTop="2dp"
                 android:text="1"
-                android:textColor="#000000" />
+                android:textColor="#000000"
+                android:textSize="12sp" />
 
         </LinearLayout>
 
@@ -84,7 +86,8 @@
                 android:layout_width="20dp"
                 android:layout_height="20dp"
                 android:layout_marginRight="4dp"
-                android:background="@drawable/shenhe_cai_pic_night_selector" />
+                android:background="@drawable/shenhe_cai_pic_night_selector"
+                android:textSize="12sp" />
 
             <TextView
                 android:id="@+id/tv_shenhe_cai_number"
@@ -124,7 +127,8 @@
                 android:gravity="center"
                 android:paddingTop="2dp"
                 android:text="3"
-                android:textColor="#44000000" />
+                android:textColor="#44000000"
+                android:textSize="12sp" />
 
         </LinearLayout>
 
@@ -146,7 +150,8 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="下载(原评论)" />
+                android:text="下载(评论)"
+                android:textSize="12sp" />
 
             <TextView
                 android:id="@+id/tv_download_number"
@@ -155,7 +160,8 @@
                 android:gravity="center"
                 android:paddingTop="2dp"
                 android:text="下载"
-                android:textColor="#44000000" />
+                android:textColor="#44000000"
+                android:textSize="12sp" />
 
         </LinearLayout>
     </LinearLayout>

@@ -12,7 +12,7 @@
         android:layout_gravity="center_vertical"
         android:text="这哪里是在斗牛，分明就是玩命嘛！"
         android:textColor="@android:color/black"
-        android:textSize="18sp" />
+        android:textSize="14sp" />
 
     <ImageView
         android:id="@+id/iv_image_icon"
@@ -34,7 +34,7 @@
             android:layout_centerVertical="true"
             android:layout_marginLeft="10dp"
             android:text="推广"
-            android:textSize="18sp" />
+            android:textSize="14sp" />
 
         <Button
             android:id="@+id/btn_install"
@@ -43,7 +43,7 @@
             android:layout_alignParentRight="true"
             android:layout_marginRight="10dp"
             android:text="安装"
-            android:textSize="18sp" />
+            android:textSize="12sp" />
     </RelativeLayout>
 
 

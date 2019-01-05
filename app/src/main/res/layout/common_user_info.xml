@@ -9,6 +9,7 @@
         android:layout_height="match_parent"
         android:layout_centerVertical="true"
         android:clickable="true"
+        android:focusable="true"
         android:gravity="center_vertical"
         android:orientation="horizontal">
 
@@ -32,7 +33,7 @@
                 android:paddingTop="5dp"
                 android:text="Zealer"
                 android:textColor="#88000000"
-                android:textSize="10dp" />
+                android:textSize="14sp" />
 
             <TextView
                 android:id="@+id/tv_time_refresh"
@@ -42,7 +43,7 @@
                 android:paddingBottom="5dp"
                 android:text="2016-03-01 08:19"
                 android:textColor="#88000000"
-                android:textSize="10dp" />
+                android:textSize="12sp" />
 
         </LinearLayout>
     </LinearLayout>

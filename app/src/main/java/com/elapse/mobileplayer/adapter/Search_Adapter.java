@@ -47,7 +47,7 @@ public class Search_Adapter extends BaseAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
         ViewHolder holder;
         if (convertView == null){
-            convertView = View.inflate(mContext, R.layout.net_item_video_pager,null);
+            convertView = View.inflate(mContext, R.layout.net_item_audio_pager,null);
             holder = new ViewHolder();
             holder.tv_desc = convertView.findViewById(R.id.tv_description);
             holder.tv_name = convertView.findViewById(R.id.tv_video_name);

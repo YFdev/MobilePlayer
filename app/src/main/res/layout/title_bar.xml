@@ -23,6 +23,7 @@
         android:focusable="true"
         android:singleLine="true"
         android:text="全网搜索"
+        android:textSize="12sp"
         android:textColor="@drawable/search_text_color" />
 
     <RelativeLayout
@@ -36,8 +37,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:clickable="true"
-            android:focusable="true"
-            android:drawableLeft="@drawable/ic_topbanner_game" />
+            android:drawableLeft="@drawable/ic_topbanner_game"
+            android:focusable="true" />
 
         <ImageView
             android:layout_width="6dp"

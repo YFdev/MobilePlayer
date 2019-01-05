@@ -184,17 +184,16 @@ public class SearchActivity extends Activity implements View.OnClickListener{
                 //缓存
 //                CacheUtils.putString(SearchActivity.this,key,result);
                 SearchBean bean = processData(result);
+                progressBar.setVisibility(View.GONE);
                 items.clear();//发起请求前清空
                 items = bean.getResult();
                 if (items != null && items.size() > 0){
                     noData.setVisibility(View.GONE);
-                    mAdapter.notifyDataSetChanged();
                 }else {
-                    mAdapter.notifyDataSetChanged();
                     noData.setVisibility(View.VISIBLE);
                     noData.setText("没有您要搜索的内容...");
                 }
-                progressBar.setVisibility(View.GONE);
+                mAdapter.notifyDataSetChanged();
             }
 
             @Override

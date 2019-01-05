@@ -1,10 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:orientation="vertical">
-
-
     <TextView
         android:id="@+id/tv_context"
         android:layout_width="match_parent"
@@ -12,19 +10,19 @@
         android:layout_gravity="center_vertical"
         android:text="这哪里是在斗牛，分明就是玩命嘛！"
         android:textColor="@android:color/black"
-        android:textSize="18sp" />
+        android:textSize="14sp" />
 
     <RelativeLayout
         android:id="@+id/rl_holder"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="220dp"
         android:layout_marginTop="5dp">
 
         <cn.jzvd.JzvdStd
             android:id="@+id/jcv_videoplayer"
             android:layout_width="match_parent"
             android:layout_height="220dp"
-            android:orientation="vertical" />
+            />
 
         <TextView
            android:layout_margin="5dp"
@@ -37,11 +35,10 @@
             android:paddingRight="5dp"
             android:text="1000次播放"
             android:textColor="@android:color/white"
-            android:textSize="14dp" />
+            android:textSize="12sp" />
 
         <TextView
             android:layout_margin="5dp"
-            android:padding="5dp"
             android:id="@+id/tv_video_duration"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -52,9 +49,7 @@
             android:paddingRight="5dp"
             android:text="12:23"
             android:textColor="@android:color/white"
-            android:textSize="14dp" />
-
-
+            android:textSize="12sp" />
     </RelativeLayout>
 
 
@@ -73,7 +68,7 @@
         android:gravity="center_vertical"
         android:paddingLeft="5dp"
         android:text="楼主，要不是我玩过98，我差点就信了"
-        android:textSize="14sp" />
+        android:textSize="12sp" />
 </LinearLayout>
 
 

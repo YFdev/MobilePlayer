@@ -23,7 +23,7 @@
             android:drawablePadding="5dp"
             android:focusable="true"
             android:hint="输入您要搜索的内容"
-            android:textColor="@drawable/search_text_color"
+            android:textColor="#9E9998"
             android:textSize="12sp" />
 
         <ImageView
