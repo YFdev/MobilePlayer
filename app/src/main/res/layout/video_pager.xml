@@ -17,7 +17,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:visibility="gone"
-        android:text="没有找到视频..."
+        android:text="@string/no_video"
         android:textColor="@android:color/black"
         android:textSize="18sp" />
     <LinearLayout
@@ -34,7 +34,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="正在加载..."
+            android:text="@string/loading"
             />
     </LinearLayout>
 </RelativeLayout>

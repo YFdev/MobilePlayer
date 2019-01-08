@@ -6,6 +6,7 @@ import android.view.ViewGroup;
 import android.widget.VideoView;
 
 /**
+ * 自定义videoView , 可以设置窗口大小，用于全屏切换
  * Created by YF_lala on 2018/12/11.
  */
 

@@ -35,7 +35,7 @@ public class SplashActivity extends Activity {
                 public void run() {
                     startMainActivity();
                 }
-            },3000);
+            },2000);
         }
     }
 
@@ -50,7 +50,7 @@ public class SplashActivity extends Activity {
                         public void run() {
                             startMainActivity();
                         }
-                    },3000);
+                    },2000);
                 }else{
                     Toast.makeText(this,"Permission denied !",Toast.LENGTH_SHORT).show();
                     finish();
@@ -59,6 +59,7 @@ public class SplashActivity extends Activity {
         }
     }
 
+    //避免多次点击启动多个activity实例，可以用flag标记，亦可设置singleTask模式
     private void startMainActivity() {
         if (!isMainStarted){
             isMainStarted = true;

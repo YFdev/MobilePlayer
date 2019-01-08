@@ -10,15 +10,15 @@ import android.os.Parcelable;
 
 public class MediaItem implements Parcelable/*Serializable*/{
 
-    private String name;
-    private long size;
-    private long duration;
-    private String data;
+    private String name;//name
+    private long size;//size
+    private long duration;//duration
+    private String data;//path
     private  String artist;
     private String imgUrl;
 //    private String videoUrl;
 //    private String highQUrl;
-    private String desc;
+    private String desc;//description
 
     public String getArtist() {
         return artist;
