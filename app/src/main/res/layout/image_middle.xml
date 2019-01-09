@@ -15,12 +15,12 @@
         android:textSize="14sp" />
 
     <ImageView
-        android:scaleType="fitCenter"
         android:id="@+id/iv_image_icon"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_margin="10dp"
         android:layout_marginTop="5dp" />
+    <!--android:scaleType="fitCenter"-->
 </LinearLayout>
 
 

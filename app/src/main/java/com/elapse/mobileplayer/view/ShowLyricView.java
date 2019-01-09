@@ -104,7 +104,7 @@ public class ShowLyricView extends android.support.v7.widget.AppCompatTextView {
 
                 push_distance = textHeight + delta;
             }
-            canvas.translate(0,-push_distance);
+            canvas.translate(0, - push_distance);
             //绘制歌词
             //绘制当前
             String cur_lyric = mLyrics.get(index).getContent();

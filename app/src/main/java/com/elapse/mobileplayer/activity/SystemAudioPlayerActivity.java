@@ -145,7 +145,8 @@ public class SystemAudioPlayerActivity extends Activity implements View.OnClickL
                         int currentPosition = mService.getCurrentPosition();
                         //设置seekBar和时间进度
                         sk_music.setProgress(currentPosition);
-                        tv_music_duration.setText(mUtils.timeToString(currentPosition)+"/"+duration);
+                        String time = mUtils.timeToString(currentPosition)+"/"+duration;
+                        tv_music_duration.setText(time);
                         Log.d("utils", "handleMessage: "+mUtils.timeToString(currentPosition)+"/"+duration);
                         //每秒更新一次
                         mHandler.removeMessages(GET_DURATION);
@@ -370,7 +371,8 @@ public class SystemAudioPlayerActivity extends Activity implements View.OnClickL
                 try {
                     mService.seekTo(progress);
                     sk_music.setProgress(progress);
-                    tv_music_duration.setText(mUtils.timeToString(progress)+"/"+duration);
+                    String dutation = mUtils.timeToString(progress)+"/"+duration;
+                    tv_music_duration.setText(duration);
                     Log.d("utils", "onProgressChanged: "+mUtils.timeToString(progress)+"/"+duration);
                 } catch (Exception e) {
                     e.printStackTrace();

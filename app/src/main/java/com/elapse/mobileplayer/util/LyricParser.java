@@ -1,7 +1,7 @@
 package com.elapse.mobileplayer.util;
 
-import android.icu.lang.UCharacter;
 import android.text.TextUtils;
+
 import com.elapse.mobileplayer.domain.Lyric;
 
 import java.io.BufferedInputStream;
@@ -34,11 +34,11 @@ public class LyricParser {
         return mLyrics;
     }
 
-    public void readFile(File file){
-        if (file == null || !file.exists()){
+    public void readFile(File file) {
+        if (file == null || !file.exists()) {
             mLyrics = null;
             isExist = false;
-        }else {
+        } else {
             //一行一行读取
             isExist = true;
             mLyrics = new ArrayList<>();
@@ -46,9 +46,9 @@ public class LyricParser {
             try {
                 reader = new BufferedReader(
                         new InputStreamReader(
-                                new FileInputStream(file),getCharset(file)));
+                                new FileInputStream(file), getCharset(file)));
                 String line = "";
-                while ((line = reader.readLine()) != null){
+                while ((line = reader.readLine()) != null) {
                     parseLyric(line);
                 }
                 reader.close();
@@ -62,19 +62,19 @@ public class LyricParser {
             Collections.sort(mLyrics, new Comparator<Lyric>() {
                 @Override
                 public int compare(Lyric o1, Lyric o2) {
-                    if (o1.getTimeStamp() < o2.getTimeStamp()){
+                    if (o1.getTimeStamp() < o2.getTimeStamp()) {
                         return -1;
-                    }else if (o1.getTimeStamp() > o2.getTimeStamp()){
+                    } else if (o1.getTimeStamp() > o2.getTimeStamp()) {
                         return 1;
-                    }else {
+                    } else {
                         return 0;
                     }
                 }
             });
             //计算显示时间
-            for (int i = 0 ; i < mLyrics.size() ; i++){
+            for (int i = 0; i < mLyrics.size(); i++) {
                 long sleepTime = mLyrics.get(i + 1).getTimeStamp() - mLyrics.get(i).getTimeStamp();
-                if (sleepTime > 0){
+                if (sleepTime > 0) {
                     mLyrics.get(i).setSleepTime(sleepTime);
                 }
             }
@@ -84,7 +84,7 @@ public class LyricParser {
     /**
      * 判断歌词编码
      */
-    public String getCharset(File file){
+    public String getCharset(File file) {
         String charset = "GBK";
         byte[] firstBytes = new byte[3];
         try {
@@ -92,46 +92,46 @@ public class LyricParser {
             BufferedInputStream bis = new BufferedInputStream(
                     new FileInputStream(file));
             bis.mark(0);
-            int read = bis.read(firstBytes,0,3);
+            int read = bis.read(firstBytes, 0, 3);
             if (read == -1)
                 return charset;
-            if (firstBytes[0] == (byte)0xFF && firstBytes[1] == (byte)0xFE){
+            if (firstBytes[0] == (byte) 0xFF && firstBytes[1] == (byte) 0xFE) {
                 charset = "UTF-16LE";
                 checked = true;
-            }else if (firstBytes[0] == (byte)0xFE && firstBytes[1] == (byte)0xFF){
+            } else if (firstBytes[0] == (byte) 0xFE && firstBytes[1] == (byte) 0xFF) {
                 charset = "utf-16be";
                 checked = true;
-            }else if (firstBytes[0] == (byte)0xEF &&
-                    firstBytes[1] == (byte)0xBB &&
-                    firstBytes[2] == (byte)0xBF){
+            } else if (firstBytes[0] == (byte) 0xEF &&
+                    firstBytes[1] == (byte) 0xBB &&
+                    firstBytes[2] == (byte) 0xBF) {
                 charset = "UTF-8";
                 checked = true;
             }
             bis.reset();
-            if (! checked){
+            if (!checked) {
                 int loc = 0;
-                while ((read = bis.read()) != -1){
-                    loc ++;
+                while ((read = bis.read()) != -1) {
+                    loc++;
                     if (read > 0xF0)
                         break;
                     if (0x80 <= read && read <= 0xBF)
                         break;
-                    if (0xC0 <= read && read <= 0xDF){
+                    if (0xC0 <= read && read <= 0xDF) {
                         read = bis.read();
-                        if (0x80 <= read && read <=0xBF)
+                        if (0x80 <= read && read <= 0xBF)
                             continue;
                         else
                             break;
-                    }else if (0xE0 <= read && read <= 0xEF){
+                    } else if (0xE0 <= read && read <= 0xEF) {
                         read = bis.read();
-                        if (0x80 <= read && read <= 0xBF){
+                        if (0x80 <= read && read <= 0xBF) {
                             read = bis.read();
-                            if (0x80 <= read && read <= 0xBF){
+                            if (0x80 <= read && read <= 0xBF) {
                                 charset = "UTF-8";
                                 break;
-                            }else
+                            } else
                                 break;
-                        }else
+                        } else
                             break;
                     }
                 }
@@ -144,24 +144,26 @@ public class LyricParser {
         }
         return charset;
     }
+
     /**
      * 解析一句歌词
+     *
      * @param line [02:04.2][03:37.32][00:59.73]我在这儿
      */
     private void parseLyric(String line) {
         String lyricLine = line;
         //替换所有“[]”
-        lyricLine = lyricLine.replaceAll("\\[","$");
-        lyricLine = lyricLine.replaceAll("\\]","$");
-        //按空格分割
+        lyricLine = lyricLine.replaceAll("\\[", "$");
+        lyricLine = lyricLine.replaceAll("\\]", "$");
+        //按'$'分割
         String[] items = lyricLine.split("$");
-        for (int i = 0;i<items.length - 1; i++ ){
+        for (int i = 0; i < items.length - 1; i++) {
             Lyric lyric = new Lyric();
-            if (!TextUtils.isEmpty(items[i].trim())){
+            if (!TextUtils.isEmpty(items[i].trim())) {
                 lyric.setTimeStamp(str2long(items[i].trim()));
-                if (! TextUtils.isEmpty(items[items.length - 1].trim())){
+                if (!TextUtils.isEmpty(items[items.length - 1].trim())) {
                     lyric.setContent(items[items.length - 1].trim());
-                }else {
+                } else {
                     lyric.setContent(" ");
                 }
                 mLyrics.add(lyric);
@@ -187,7 +189,7 @@ public class LyricParser {
             return minute * 60 * 1000 + second * 1000 + mill * 10;
         } catch (NumberFormatException e) {
             e.printStackTrace();
-            return  -1;
+            return -1;
         }
     }
 }

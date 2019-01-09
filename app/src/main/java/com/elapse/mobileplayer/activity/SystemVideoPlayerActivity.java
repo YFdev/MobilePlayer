@@ -433,6 +433,7 @@ public class SystemVideoPlayerActivity extends Activity implements View.OnClickL
             return true;
         }
     }
+
     //音量控制条
     private class VolumeSeekBarChangeListener implements SeekBar.OnSeekBarChangeListener {
 
@@ -748,21 +749,21 @@ public class SystemVideoPlayerActivity extends Activity implements View.OnClickL
             case MotionEvent.ACTION_MOVE:
                 float endY = event.getY();
                 float endX = event.getX();
-                float distanceY = startY - endY;
+                float deltaY = startY - endY;
 
                 if (endX < screenWidth / 2){
                     //左侧，调节亮度
                     final double FLING_MIN_DISTANCE = 0.5;
                     final double FLING_MIN_VELOCITY = 0.5;
-                    if (startY - endY > FLING_MIN_DISTANCE && Math.abs(distanceY) > FLING_MIN_VELOCITY){
+                    if (startY - endY > FLING_MIN_DISTANCE && Math.abs(deltaY) > FLING_MIN_VELOCITY){
                         setBrightness(20);
                     }
-                    if (startY - endY < FLING_MIN_DISTANCE && Math.abs(distanceY) > FLING_MIN_VELOCITY){
+                    if (startY - endY < FLING_MIN_DISTANCE && Math.abs(deltaY) > FLING_MIN_VELOCITY){
                         setBrightness(-20);
                     }
                 }else {
                     //右侧，调节声音
-                    float deltaVolume  = (distanceY/distanceY) * maxVolume;
+                    float deltaVolume  = (deltaY/distanceY) * maxVolume;
                     int volume = (int) Math.min(Math.max(0,mVolume + deltaVolume),maxVolume);
                     if (deltaVolume != 0){
                         updateVolume(volume,isMute);

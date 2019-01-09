@@ -90,18 +90,20 @@ public class Net_Audio_Adapter extends BaseAdapter {
                         " ",
                         Jzvd.SCREEN_WINDOW_NORMAL);
                 Glide.with(mContext).load(item.getVideo().getThumbnail().get(0)).into(holder.jcv_videoplayer.thumbImageView);
-                holder.tv_play_nums.setText(item.getVideo().getPlaycount() + "次播放");
-                holder.tv_video_duration.setText(utils.timeToString(
-                        item.getVideo().getDuration() * 1000) + "");
+                String playCount = item.getVideo().getPlaycount() + "次播放";
+                holder.tv_play_nums.setText(playCount);
+                String videoDuration = utils.timeToString(
+                        item.getVideo().getDuration() * 1000) + "";
+                holder.tv_video_duration.setText(videoDuration);
                 break;
             case TYPE_IMAGE://图片
                 bindData(holder, item);
                 holder.iv_image_icon.setImageResource(R.drawable.bg_item);
                 int  height = item.getImage().getHeight()<= DensityUtil.getScreenHeight()*0.75 ?
                         item.getImage().getHeight(): (int) (DensityUtil.getScreenHeight() * 0.75);
-
+                int width = item.getImage().getWidth();
                 LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                        DensityUtil.getScreenWidth(),height);
+                        width,height);
                 holder.iv_image_icon.setLayoutParams(params);
                 if(item.getImage() != null &&  item.getImage().getBig()!= null &&
                         item.getImage().getBig().size() >0){
@@ -116,7 +118,7 @@ public class Net_Audio_Adapter extends BaseAdapter {
                 break;
             case TYPE_GIF://gif
                 bindData(holder, item);
-                System.out.println("item.getGif().getImages().get(0)" + item.getGif().getImages().get(0));
+//                System.out.println("item.getGif().getImages().get(0)" + item.getGif().getImages().get(0));
                 Glide.with(mContext).load(item.getGif().getImages().get(0)).
                         diskCacheStrategy(DiskCacheStrategy.SOURCE).into(holder.iv_image_gif);
 
@@ -244,7 +246,7 @@ public class Net_Audio_Adapter extends BaseAdapter {
 
     /**
      * 获取item类型数量
-     * @return
+     * @return 5
      */
     @Override
     public int getViewTypeCount() {
